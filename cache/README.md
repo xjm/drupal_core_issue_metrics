@@ -1,0 +1,1 @@
+This directory contains cached results by the URL of page 0 and the week.
