@@ -22,7 +22,7 @@ class IssueRequest {
   /**
    * The constructed URLs for the queries.
    */
-  public array $urls;
+  protected array $urls;
 
   /**
    * Constructs a new issue query URL.
@@ -40,6 +40,27 @@ class IssueRequest {
     foreach ($branches as $branch) {
       $this->urls[$branch] = $url_base . '&field_issue_version='. $branch . '-dev';
     }
+  }
+
+  /**
+   * Gets the array of API request URLs.
+   */
+  public function getUrls() {
+    return $this->urls;
+  }
+
+  /**
+   * Gets the array of branches
+   */
+  public function getBranches() {
+    return $this->branches;
+  }
+
+  /**
+   * Gets the issue type.
+   */
+  public function getType() {
+    return $this->type;
   }
 
 }

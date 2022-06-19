@@ -32,8 +32,8 @@ class Fetcher {
    * Fetches data from the URLs.
    */
   public function fetch() {
-    foreach ($this->issueRequest->urls as $branch => $url) {
-      print "Fetching {$this->issueRequest->type} data for $branch.\n";
+    foreach ($this->issueRequest->getUrls() as $branch => $url) {
+      print "Fetching {$this->issueRequest->getType()} data for $branch.\n";
       $this->data[$branch] =  $this->doFetch($url);
     }
   }
@@ -42,7 +42,7 @@ class Fetcher {
    * Fetches all pages for a given query URL.
    *
    * @param string $url
-   *   The URL to fetch.
+   *   The URL of page 0.
    */
   protected function doFetch($url) {
     // Cache results locally.
@@ -74,8 +74,6 @@ class Fetcher {
    *
    * @param string $url
    *   The URL to fetch.
-   * $param int $page
-   *   The page to fetch. Defaults to 0.
    */
   protected function doFetchPage($url) {
     $response = $this->client->request('GET', $url);
