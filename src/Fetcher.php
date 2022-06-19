@@ -5,7 +5,7 @@ namespace Drupal\core_metrics;
 use GuzzleHttp\Client;
 
 /**
- * Fetches results for a given IssueQuery object.
+ * Fetches results for a given IssueRequest object.
  *
  * @see https://www.drupal.org/drupalorg/docs/apis/rest-and-other-apis
  */
@@ -19,7 +19,7 @@ class Fetcher {
   /**
    * Constructs a new fetcher.
    */
-  public function __construct(protected IssueQuery $issueQuery, protected Client $client) {}
+  public function __construct(protected IssueRequest $issueRequest, protected Client $client) {}
 
   /**
    * Gets the stored data from the response.
@@ -32,8 +32,8 @@ class Fetcher {
    * Fetches data from the URLs.
    */
   public function fetch() {
-    foreach ($this->issueQuery->urls as $branch => $url) {
-      print "Fetching {$this->issueQuery->type} data for $branch.\n";
+    foreach ($this->issueRequest->urls as $branch => $url) {
+      print "Fetching {$this->issueRequest->type} data for $branch.\n";
       $this->data[$branch] =  $this->doFetch($url);
     }
   }

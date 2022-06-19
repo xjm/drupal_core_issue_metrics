@@ -7,7 +7,7 @@ namespace Drupal\core_metrics;
  *
  * @see https://www.drupal.org/drupalorg/docs/apis/rest-and-other-apis
  */
-class IssueQuery {
+class IssueRequest {
 
   /**
    * The base URL for querying core issue metadata.
