@@ -57,7 +57,9 @@ class Fetcher {
     do {
       print "Fetching page $i.\n";
       $page = $this->doFetchPage($url);
-      $url = str_replace('api-d7/node', 'api-d7/node.json', $page->next);
+      if (!empty($page->next)) {
+        $url = str_replace('api-d7/node', 'api-d7/node.json', $page->next);
+      }
       $data = array_merge($data, $page->list);
       $i++;
       // Cap the number of pages we fetch at 200 so Neil doesn't ban us.
