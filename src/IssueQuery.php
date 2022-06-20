@@ -17,25 +17,55 @@ class IssueQuery {
   /**
    * The static issue metadata IDs.
    */
-  protected static MagicIntMetadata $MagicIntMetadata;
+  protected static MagicIntMetadata $magic;
 
   /**
    * Constructs a new issue query.
    *
-   * @param array $branches
-   *   The git branch names to select. '-dev' will be appended automatically.
    * @param \PDO $db
    *    The database connection. If NULL, a new connection to the SQLite
    *    database at the default path is opened.
    */
-  public function __construct(protected array $branches, IssueMetadata $metadata = NULL, PDO $db = NULL) {
-    static::$MagicIntMetadata = new MagicIntMetadata();
+  public function __construct(protected array $branches, protected IssueMetadata $metadata = new IssueMetadata(), PDO $db = NULL) {
+    static::$magic = new MagicIntMetadata();
 
     // Initialize the database connection.
     if ($db === NULL) {
       $db = new PDO('sqlite:' . __DIR__ . '/' . static::$dbPath);
     }
     $this->db = $db;
+  }
+
+  /**
+   * Configures the query to find open, untriaged critical bugs.
+   */
+  public function findUntriagedCriticalBugs() {
+    $this->metadata->setTypes(['bug']);
+    $this->metadata->setPriorities(['critical']);
+    $this->metadata->setTaxonomyData(['triaged_critical', 'critical_triage_deferred'], TRUE);
+  }
+
+  /**
+   * Finds issues that may have been committed to a given branch.
+   *
+   * This issue searches branches before and after the given issue, since
+   * issues may be backported and the selector is not always set correctly.
+   * Data should be checked against the git log to validate which branches
+   * actually received the commits.
+   *
+   * @param string $branch
+   *   The main branch for which to fetch data.
+   * @param array $types
+   *   (optional) The issue types (categories) to select. Ignored if empty.
+   * @param array $priorities
+   *   (optional) The issue priorities to select. Ignored if empty.
+   */
+  public function findIssuesFixedIn($branch, array $types = [], array $priorities = []) {
+    $branches = static::getFixRelevantBranches($branch);
+    $this->metadata->setBranches($branches);
+    $this->metadata->setStatuses(static::$magic::$fixed);
+    $this->metadata->setTypes($types);
+    $this->metadata->setPriorities($priorities);
   }
 
   /**
@@ -57,13 +87,12 @@ class IssueQuery {
    * the commit log.
    */
   public static function getFixRelevantBranches($branch) {
-    $regex = '/([0-9])*\.([0-9])*.x/';
-    $matches = [];
-    if (!preg_match($regex, $branch, $matches)) {
-      throw new \UnexpectedValueException("The \$branch $branch for IssueQuery::getFixRelevantBranches() must be of the pattern 'major.minor.x', e.g. '9.4.x'.");
-    }
-    $major = (int) $matches[1];
-    $minor = (int) $matches[2];
+    // Validate the branch and cast it to git format (e.g. 9.4.x).
+    static::$metadata::validateBranch($branch, FALSE);
+
+    // Since we know the structure, we can get the major and minor by exploding
+    // on '.'.
+    list($major, $minor) = explode('.', $branch);
 
     // Valid minors for Drupal 8 are 8.0.x through 8.9.x.
     // Valid minors for Drupal 9 are 9.0.x through 9.5.x.
