@@ -17,7 +17,7 @@ class IssueRequest {
   /**
    * The static issue metadata.
    */
-  protected static IssueMetadata $metadata;
+  protected static MagicIntMetadata $metadata;
 
   /**
    * The constructed URLs for the queries.
@@ -31,7 +31,7 @@ class IssueRequest {
    * must construct multiple query URLs in order to filter the data.
    */
   public function __construct(protected array $branches, public string $type) {
-    static::$metadata = new IssueMetadata();
+    static::$metadata = new MagicIntMetadata();
 
     $url_base = static::URL
       . '&field_issue_category='

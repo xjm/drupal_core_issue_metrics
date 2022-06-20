@@ -3,136 +3,193 @@
 namespace Drupal\core_metrics;
 
 /**
- * Static value object of issue metadata.
- *
- * @see https://www.drupal.org/drupalorg/docs/apis/rest-and-other-apis
+ * Defines a value object of issue metadata for a database query.
  */
 class IssueMetadata {
 
   /**
-   * Issue statuses.
+   * The static issue metadata.
    */
-  public static $status = [
-    'active' => 1,
-    'nw' => 13,
-    'nr'  => 8,
-    'rtbc' => 14,
-    'postponed' => 4,
-    'fixed' => 2,
-    'closed_fixed' => 7,
-  ];
+  protected static MagicIntMetadata $metadata;
 
   /**
-   * The fixed statuses.
-   */
-  public static $fixed = [2, 7];
-
-  /**
-   * The relevant open statuses.
-   */
-  public static $open = [1, 13, 8, 14, 4];
-
-  /**
-   * Issue priorities.
-   */
-  public static $priority = [
-   'critical' => 400,
-   'major' => 300,
-   'normal' => 200,
-   'minor' => 100,
-  ];
-
-  /**
-   * Issue types.
-   */
-  public static $type = [
-    'bug' => 1,
-    'task' => 2,
-    'plan' => 5,
-    'feature' => 3,
-  ];
-
-  /**
-   * Current issue branches.
-   */
-  public static $branches = [
-   // The current (stable) minor release branch.
-   'stable' => '9.4.x',
-
-   // The security-only branch.
-   'sec' => '9.3.x',
-
-   // The upcoming (alpha, beta, or RC) minor release branch in preparation.
-   'prep' => '9.5.x',
-
-   // The next (developmental) minor release branch.
-   'dev' => '9.5.x',
-
-   // The next major release branch.
-   'major' => '10.0.x',
-  ];
-
-  /**
-   * Issue tag term IDs.
+   * The issue categories to select, as an array of human-readable short names
+   * (e.g. 'bug' or 'task'). All issue types are included by default.
    *
-   * These term IDs will be found in taxonomy_vocabularly_9.
+   * @var string[]
    */
-  public static $tids = [
-    'triaged_critical' => 164349,
-    'triaged_major' => 174642,
-    'critical_triage_deferred' => 169071,
-    'major_triage_deferred' => 177412,
-    'major_current_state' => 177626,
-    'fm_review' => 169963,
-    'pm_review' => 170004,
-    'rm_review' => 171496,
-    'd8up' => 27290,
-    'd7backport' => 21556,
-    'd6backport' => 182,
-    'vdc' => 36416,
-    'twig' => 36330,
-    'entity' => 38578,
-    'blocker' => 38080,
-    'api_first' => 177096,
-  ];
+  protected array $categories = ['bug', 'task', 'feature', 'plan'];
 
-  public static $uids = [
-    'dries' => 1,
-    'alexpott' => 157725,
-    'catch' => 35733,
-    'cilefen' => 1850070,
-    'cottser' => 1167326,
-    'devin' => 290182,
-    'alwaysworking' => 1602706,
-    'effulgentsia' => 78040,
-    'gabor' => 4166,
-    'jessebeach' => 748566,
-    'larowlan' => 395439,
-    'lauriii' => 1078742,
-    'moshe' => 23,
-    'plach' => 183211,
-    'timplunkett' => 241634,
-    'webchick' => 24967,
-    'wim' => 99777,
-    'xjm' => 65776,
-    'yoroy' => 41502,
-    'system_message' => 180064,
-  ];
+  /**
+   * The issue priorities to select, as an array of human-readable short names
+   * (e.g. 'critical' or 'major'). By default, all priorities are included.
+   *
+   * @var string[]
+   */
+  protected array $priorities = ['critical', 'major', 'normal', 'minor'];
 
-  public static $fm = ['alexpott', 'effulgentsia', 'catch', 'larowlan'];
-  public static $fefm = ['lauriii', 'bnjmnm', 'ckrina'];
-  public static $rm = ['catch', 'xjm', 'quietone'];
-  public static $pm = ['dries', 'webchick', 'yoroy', 'gabor'];
-  public static $js = ['nod_', 'justafish'];
+  /**
+   * The issue statuses to select, as an array of human-readable short names
+   * (e.g. 'postponed' or 'nr'). If this is empty, the constructor will
+   * automatically select all issues in "relevant" open statuses (everything
+   * except 'Fixed' and PMNMI).
+   *
+   * @var string[]
+   */
+  protected array $statuses = [];
 
-  public static $dat = [
-    'gabor',
-    'effulgentsia',
-    'wim',
-    'xjm',
-    'timplunkett',
-    'tedbow',
-    // ...
-  ];
+  /**
+   * Array of issue components to select. If empty, issues in all components
+   * are returned.
+   *
+   * @var string[]
+   */
+  protected array $components;
+
+  /**
+   * Taxonomy term IDs to use in the filter.
+   *
+   * @var int[]
+   */
+  protected array $tids = [];
+
+  /**
+   * Whether to EXCLUDE issues with ANY of the tags (TRUE), or INCLUDE issues
+   * with ALL of the tags (FALSE).
+   *
+   * @var bool
+   */
+  protected bool $excludeTerms = FALSE;
+
+  /**
+   * Constructs a new issue metadata value object.
+   */
+  public function __construct() {
+    static::$metadata = new MagicIntMetadata();
+    $this->statuses = static::$metadata::$open;
+  }
+
+  /**
+   * Sets the issue categories.
+   *
+   * @param string[] $categories
+   *   The issue types to select.
+   */
+  public function setCategories(array $categories) {
+    $this->categories = $categories;
+  }
+
+  /**
+   * Gets the issue categories.
+   *
+   * @return string[]
+   *   The issue types to select.
+   */
+  public function getCategories() {
+    return $this->categories;
+  }
+
+  /**
+   * Sets the priorities.
+   *
+   * @param string[] $priorities
+   *   The issue priorities to select, e.g. 'nw' or 'postponed'.
+   */
+  public function setPriorities(array $priorities) {
+    $this->priorities = $priorities;
+  }
+
+  /**
+   * Gets the issue priorities.
+   *
+   * @return string[]
+   *   The issue types to select.
+   */
+  public function getPriorities() {
+    return $this->priorities;
+  }
+
+  /**
+   * Sets the statuses.
+   *
+   * @param string[] $statuses
+   *   The issue statuses to select, e.g. 'nw' or 'postponed'.
+   */
+  public function setStatuses(array $statuses) {
+    $this->statuses = $statuses;
+  }
+
+  /**
+   * Gets the issue statuses.
+   *
+   * @return string[]
+   *   The issue types to select.
+   */
+  public function getStatuses() {
+    return $this->statuses;
+  }
+
+  /**
+   * Sets the components.
+   *
+   * @param string[] $components
+   *   The issue components to select, e.g. 'nw' or 'postponed'.
+   */
+  public function setComponents(array $components) {
+    $this->components = $components;
+  }
+
+  /**
+   * Gets the issue components.
+   *
+   * @return string[]
+   *   The issue types to select.
+   */
+  public function getComponents() {
+    return $this->components;
+  }
+
+  /**
+   * Sets the taxonomy term query data.
+   *
+   * @param array $terms
+   *   If the values of terms are integers, they are assumed to be term IDs. If
+   *   they are strings, they are assumed to be shorthand labels as defined in
+   *   the magic metadata.
+   * @param bool $exclude
+   *   Whether to search for issues that include ALL the given tags (FALSE), or
+   *   NONE OF the given tags (TRUE). Defaults to FALSE.
+   */
+  public function setTaxonomyData(array $terms, $exclude = FALSE) {
+    if (is_string($terms[0])) {
+      // Overwrite the data with known tid values for the short names.
+      foreach ($terms as $index => $term) {
+        $terms[$index] = static::$metadata::$tids[$term];
+      }
+    }
+    $this->tids = $terms;
+    $this->excludeTerms = $exclude;
+  }
+
+  /**
+   * Gets the taxonomy term IDs.
+   *
+   * @return string[]
+   *   The term IDs to use for filtering.
+   */
+  public function getTids() {
+    return $this->tids;
+  }
+
+  /**
+   * Gets the setting for whether the terms should be included or excluded.
+   *
+   * @return bool
+   *   TRUE if the terms should all be excluded, or FALSE if they should all be
+   *   included.
+   */
+  public function excludeTids() {
+    return $this->excludeTids;
+  }
 
 }

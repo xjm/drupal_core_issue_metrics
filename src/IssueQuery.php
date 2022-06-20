@@ -2,10 +2,41 @@
 
 namespace Drupal\core_metrics;
 
+use \PDO;
+
 /**
  * Queries issue data.
  */
 class IssueQuery {
+
+  /**
+   * The relative path to the SQLite database file.
+   */
+  protected static string $dbPath = '../data/issue_data.sqlite';
+
+  /**
+   * The static issue metadata IDs.
+   */
+  protected static MagicIntMetadata $MagicIntMetadata;
+
+  /**
+   * Constructs a new issue query.
+   *
+   * @param array $branches
+   *   The git branch names to select. '-dev' will be appended automatically.
+   * @param \PDO $db
+   *    The database connection. If NULL, a new connection to the SQLite
+   *    database at the default path is opened.
+   */
+  public function __construct(protected array $branches, IssueMetadata $metadata = NULL, PDO $db = NULL) {
+    static::$MagicIntMetadata = new MagicIntMetadata();
+
+    // Initialize the database connection.
+    if ($db === NULL) {
+      $db = new PDO('sqlite:' . __DIR__ . '/' . static::$dbPath);
+    }
+    $this->db = $db;
+  }
 
   /**
    * Gets the relevant branches for fixed issues for a given branch.
