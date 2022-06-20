@@ -3,6 +3,7 @@
 namespace Drupal\core_metrics;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 
 /**
  * Fetches results for a given IssueRequest object.
@@ -46,17 +47,40 @@ class Fetcher {
    */
   protected function doFetch($url) {
     // Cache results locally.
-    $filename = __DIR__ . '/../cache/' . preg_replace('/[^A-Za-z0-9_\-]/', '_', $url) . '_' . date('Y-W') . '.txt';
-    if (file_exists($filename)) {
+    $file_name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $url) . '_' . date('Y-W') . '.txt';
+    $file_path = __DIR__ . '/../cache/' . $file_name;
+    $partial_path = __DIR__ . '/../cache/partial/' . $file_name;
+    $i = 0;
+
+    print $file_path . "\n";
+    die();
+
+    if (file_exists($file_path)) {
       print "Loading data from cache.\n";
-      return json_decode(file_get_contents($filename));
+      return json_decode(file_get_contents($file_path));
+    }
+    elseif (file_exists($partial_path)) {
+      print "Loading partial data from cache.\n";
+      $data =  json_decode(file_get_contents($partial_path));
+      $i = $data->PAGER;
+      unset($data->PAGER);
     }
 
-    $i = 0;
     $data = [];
     do {
       print "Fetching page $i.\n";
-      $page = $this->doFetchPage($url);
+      try {
+        $page = $this->doFetchPage($url);
+      }
+      catch (BadResponseException $e) {
+        if ($i > 0 && $e->getCode() === 503) {
+          $data['PAGER'] = $i;
+          print "Writing partial data...\n";
+          file_put_contents($partial_path, json_encode($data));
+        }
+        die("Failed to fetch data on page $i.\n");
+      }
+
       if (!empty($page->next)) {
         $url = str_replace('api-d7/node', 'api-d7/node.json', $page->next);
       }
@@ -65,7 +89,7 @@ class Fetcher {
       // Cap the number of pages we fetch at 200 so Neil doesn't ban us.
     } while (($i < 200) && (!empty($page->next)));
 
-    file_put_contents($filename, json_encode($data));
+    file_put_contents($file_path, json_encode($data));
     return $data;
   }
 
@@ -76,7 +100,21 @@ class Fetcher {
    *   The URL to fetch.
    */
   protected function doFetchPage($url) {
-    $response = $this->client->request('GET', $url);
+    try {
+      $response = $this->client->request('GET', $url);
+    }
+    catch (BadResponseException $e) {
+      if ($e->getCode() === 503) {
+        // If we get a 503, sleep and retry once.
+        print "Got a 503; retrying...\n";
+        sleep(10);
+        $response = $this->client->request('GET', $url);
+      }
+      else {
+        throw $e;
+      }
+    }
+
     $response_body = json_decode($response->getBody());
     return $response_body;
   }
