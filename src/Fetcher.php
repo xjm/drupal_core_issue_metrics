@@ -52,9 +52,6 @@ class Fetcher {
     $partial_path = __DIR__ . '/../cache/partial/' . $file_name;
     $i = 0;
 
-    print $file_path . "\n";
-    die();
-
     if (file_exists($file_path)) {
       print "Loading data from cache.\n";
       return json_decode(file_get_contents($file_path));
