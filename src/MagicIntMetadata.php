@@ -55,12 +55,9 @@ class MagicIntMetadata {
   /**
    * Current issue branches.
    */
-  public static $branches = [
+  public static $activeBranches = [
    // The current (stable) minor release branch.
    'stable' => '9.4.x',
-
-   // The security-only branch.
-   'sec' => '9.3.x',
 
    // The upcoming (alpha, beta, or RC) minor release branch in preparation.
    'prep' => '9.5.x',
@@ -78,17 +75,18 @@ class MagicIntMetadata {
    * These term IDs will be found in taxonomy_vocabularly_9.
    */
   public static $tids = [
-    'triaged_critical' => 164349,
+    'triaged_critical' => 197921,
     'triaged_major' => 174642,
-    'critical_triage_deferred' => 169071,
-    'major_triage_deferred' => 177412,
-    'major_current_state' => 177626,
+    'critical_triage_deferred' => 197925,
+    'major_triage_deferred' => 197926,
+    'major_current_state' => 197923,
+    'needs_major_current_state' => 180003,
     'fm_review' => 169963,
+    'fefm_review' => 186449,
     'pm_review' => 170004,
     'rm_review' => 171496,
-    'd8up' => 27290,
-    'd7backport' => 21556,
-    'd6backport' => 182,
+    'js_review' => 7488,
+    'needs_rn' => 187468,
     'vdc' => 36416,
     'twig' => 36330,
     'entity' => 38578,
