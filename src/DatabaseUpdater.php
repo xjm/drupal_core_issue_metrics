@@ -18,10 +18,11 @@ class DatabaseUpdater {
   /**
    * Constructs a new database updater.
    */
-  public function __construct(protected SQLite3 $db = NULL) {
-    if ($this->db === NULL) {
-      $this->db = new SQLite3(__DIR__ . '/' . static::$dbPath);
+  public function __construct(SQLite3 $db = NULL) {
+    if ($db === NULL) {
+      $db = new SQLite3(__DIR__ . '/' . static::$dbPath);
     }
+    $this->db = $db;
   }
 
   /**
