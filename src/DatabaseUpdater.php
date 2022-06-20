@@ -31,6 +31,7 @@ class DatabaseUpdater {
    * Writes data from a branch/type result set to the database.
    */
   public function writeData($data) {
+    print "Writing data for up to " . sizeof($data) . " issues...\n";
     $pdo = new PDO('sqlite:' . __DIR__ . '/' . static::$dbPath);
     foreach ($data as $datum) {
       $queries[] = 'INSERT OR IGNORE INTO issue_data '
