@@ -16,15 +16,12 @@ class DatabaseUpdater {
   protected static string $dbPath = '../data/issue_data.sqlite';
 
   /**
-   * The connection to the databse.
-   */
-  protected SQLite3 $db;
-
-  /**
    * Constructs a new database updater.
    */
-  public function __construct() {
-    $this->db = new SQLite3(__DIR__ . '/' . static::$dbPath);
+  public function __construct(protected SQLite3 $db = NULL) {
+    if ($this->db === NULL) {
+      $this->db = new SQLite3(__DIR__ . '/' . static::$dbPath);
+    }
   }
 
   /**
