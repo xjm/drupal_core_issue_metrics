@@ -9,7 +9,7 @@ use Drupal\core_metrics\IssueQuery;
 use Drupal\core_metrics\IssueRequest;
 
 $branches = IssueQuery::getFixRelevantBranches('9.4.x');
-$fetcher = new Fetcher(new IssueRequest($branches, 'bug'), new Client());
+$fetcher = new Fetcher(new IssueRequest($branches, 'task'), new Client());
 $fetcher->fetch();
 $data = $fetcher->getData();
 
