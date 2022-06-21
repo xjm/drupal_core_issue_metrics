@@ -22,7 +22,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
     $this->statuses = static::$metadata::$open;
 
     // By default, select the actively supported branches.
-    $this->versions = array_unique(static::$metadata::$activeBranches);
+    $this->setVersions(array_unique(static::$metadata::$activeBranches));
   }
 
   /**
