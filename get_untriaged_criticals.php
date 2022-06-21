@@ -17,7 +17,7 @@ $csv = "nid, title, component, age, last_update\n";
 foreach ($results as $row) {
   $created = new DateTime('@' . $row['created']);
   $changed = new DateTime('@' . $row['changed']);
-  $csv_row = [
+  $csvRow = [
     $row['nid'],
     $row['title'],
     $row['component'],
@@ -25,7 +25,7 @@ foreach ($results as $row) {
     $changed->diff($now)->days,
   ];
 
-  $csv .= '"' . implode('","', $csv_row) . '"' . "\n";
+  $csv .= '"' . implode('","', $csvRow) . '"' . "\n";
 }
 
 print $csv;
