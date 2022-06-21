@@ -40,25 +40,78 @@ class Fetcher {
   }
 
   /**
+   * Fetches one data set from the cache only.
+   */
+  public function fetchAllFromCache() {
+    foreach ($this->issueRequest->getUrls() as $branch => $url) {
+      $this->data[$branch] = $this->fetchFromCache($url);
+      if (empty($this->data[$branch])) {
+        throw new \Exception("Data for branch $branch is not available in the cache. Fetch it first.");
+      }
+    }
+  }
+
+  /**
+   * Fetches one data set from the cache only.
+   */
+  public function fetchFromCache(string $url) {
+    $path = static::getCacheFilePath(static::getCacheFileName($url));
+    if (file_exists($path)) {
+      return json_decode(file_get_contents($path));
+    }
+  }
+
+  /**
+   * Constructs the caching filename for the URL.
+   *
+   * @param string $url
+   *   The URL of the issue request.
+   */
+  protected static function getCacheFileName(string $url) {
+    return preg_replace('/[^A-Za-z0-9_\-]/', '_', $url) . '_' . date('Y-W') . '.txt';
+  }
+
+  /**
+   * Constructs the path to the cache file.
+   *
+   * @param string $fileName
+   *   The filename.
+   */
+  protected static function getCacheFilePath(string $fileName) {
+    return __DIR__ . '/../cache/' . $fileName;
+  }
+
+  /**
+   * Constructs the path to the partial cache file.
+   *
+   * @param string $fileName
+   *   The filename.
+   */
+  protected static function getPartialFilePath(string $fileName) {
+    return __DIR__ . '/../cache/partial/' . $fileName;
+  }
+
+  /**
    * Fetches all pages for a given query URL.
    *
    * @param string $url
    *   The URL of page 0.
    */
   protected function doFetch($url) {
+    $cache = $this->fetchFromCache($url);
+    if (!empty($cache)) {
+      print "Loading data from cache.\n";
+      return $cache;
+    }
     // Cache results locally.
-    $file_name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $url) . '_' . date('Y-W') . '.txt';
-    $file_path = __DIR__ . '/../cache/' . $file_name;
-    $partial_path = __DIR__ . '/../cache/partial/' . $file_name;
+    $fileName = static::getCacheFileName($url);
+    $filePath = static::getCacheFilePath($url);
+    $partialPath = static::getPartialFilePath($url);
     $i = 0;
 
-    if (file_exists($file_path)) {
-      print "Loading data from cache.\n";
-      return json_decode(file_get_contents($file_path));
-    }
-    elseif (file_exists($partial_path)) {
+    if (file_exists($partialPath)) {
       print "Loading partial data from cache.\n";
-      $data =  json_decode(file_get_contents($partial_path));
+      $data = json_decode(file_get_contents($partialPath));
       $i = $data->PAGER;
       unset($data->PAGER);
     }
@@ -73,7 +126,7 @@ class Fetcher {
         if ($i > 0 && $e->getCode() === 503) {
           $data['PAGER'] = $i;
           print "Writing partial data...\n";
-          file_put_contents($partial_path, json_encode($data));
+          file_put_contents($partialPath, json_encode($data));
         }
         die("Failed to fetch data on page $i.\n");
       }
@@ -86,7 +139,7 @@ class Fetcher {
       // Cap the number of pages we fetch at 200 so Neil doesn't ban us.
     } while (($i < 200) && (!empty($page->next)));
 
-    file_put_contents($file_path, json_encode($data));
+    file_put_contents($filePath, json_encode($data));
     return $data;
   }
 
