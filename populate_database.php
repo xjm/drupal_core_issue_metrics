@@ -16,8 +16,8 @@ $types = ['bug', 'task', 'feature', 'plan'];
 $data = [];
 
 $updater = new DatabaseUpdater();
-// $updater->dropTables();
-// $updater->createTables();
+$updater->dropTables();
+$updater->createTables();
 
 $types = ['plan'];
 foreach ($types as $type) {
