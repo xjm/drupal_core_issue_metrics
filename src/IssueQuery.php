@@ -26,7 +26,7 @@ class IssueQuery {
    *    The database connection. If NULL, a new connection to the SQLite
    *    database at the default path is opened.
    */
-  public function __construct(protected array $branches, protected IssueMetadata $metadata = new IssueMetadata(), PDO $db = NULL) {
+  public function __construct(protected IssueMetadata $metadata = new IssueMetadata(), PDO $db = NULL) {
     static::$magic = new MagicIntMetadata();
 
     // Initialize the database connection.
@@ -34,6 +34,13 @@ class IssueQuery {
       $db = new PDO('sqlite:' . __DIR__ . '/' . static::$dbPath);
     }
     $this->db = $db;
+  }
+
+  /**
+   * Gets an immutable copy of the current issue metadata.
+   */
+  public function getMetadata() {
+    return new ImmutableIssueMetadata($this->metadata);
   }
 
   /**
