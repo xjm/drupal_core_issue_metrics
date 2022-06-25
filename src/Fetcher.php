@@ -40,7 +40,7 @@ class Fetcher {
   }
 
   /**
-   * Fetches one data set from the cache only.
+   * Fetches all requested data set from the cache only.
    */
   public function fetchAllFromCache() {
     foreach ($this->issueRequest->getUrls() as $branch => $url) {
@@ -53,12 +53,57 @@ class Fetcher {
 
   /**
    * Fetches one data set from the cache only.
-   */
-  public function fetchFromCache(string $url) {
-    $path = static::getCacheFilePath(static::getCacheFileName($url));
+   * @param string $url
+   *   The Drupal.org query URL.
+   * @param bool $partial
+   *   (optional) Whether to write to the partial data path. Defaults to FALSE.
+  */
+  public function fetchFromCache(string $url, bool $partial = FALSE) {
+      $name = static::getCacheFileName($url);
+      $path = $partial ? static::getPartialFilePath($name) : static::getCacheFilePath($name);
     if (file_exists($path)) {
       return json_decode(file_get_contents($path));
     }
+  }
+
+  /**
+   * Writes one data set to the cache.
+   *
+   * @param string $url
+   *   The Drupal.org query URL.
+   * @param mixed $data
+   *   The data to encode for storage.
+   * @param bool $partial
+   *   (optional) Whether to write to the partial data path. Defaults to FALSE.
+  */
+  public function writeToCache(string $url, $data, $partial = FALSE) {
+      $name = static::getCacheFileName($url);
+      $path = $partial ? static::getPartialFilePath($name) : static::getCacheFilePath($name);
+    file_put_contents($path, json_encode($data));
+  }
+
+  /**
+   * Gets the pager from a partial data set and unsets it.
+   *
+   * @param mixed $data
+   *   The data loaded from the partial cache.
+   */
+  public function extractPager($data) {
+    $pager = $data->PAGER;
+    unset($data->PAGER);
+    return $pager;
+  }
+
+  /**
+   * Inserts the pager for a partial data set.
+   *
+   * @param mixed $data
+   *   The data loaded from the partial cache.
+   * @param int pager
+   *   The page of the result set that failed.
+   */
+  public function insertPager($data, $pager) {
+    $data['PAGER'] = $i;
   }
 
   /**
@@ -85,7 +130,6 @@ class Fetcher {
    * Constructs the path to the partial cache file.
    *
    * @param string $fileName
-   *   The filename.
    */
   protected static function getPartialFilePath(string $fileName) {
     return __DIR__ . '/../cache/partial/' . $fileName;
@@ -98,40 +142,44 @@ class Fetcher {
    *   The URL of page 0.
    */
   protected function doFetch($url) {
+    // Return data from the cache if it is available.
     $cache = $this->fetchFromCache($url);
     if (!empty($cache)) {
       print "Loading data from cache.\n";
       return $cache;
     }
-    // Cache results locally.
-    $fileName = static::getCacheFileName($url);
-    $filePath = static::getCacheFilePath($url);
-    $partialPath = static::getPartialFilePath($url);
+    // Otherwise, cache results locally.
     $i = 0;
+    $data = [];
 
-    if (file_exists($partialPath)) {
+    // Load partial data from the cache if it is available, starting with the
+    // first failed page
+    if ($data = $this->fetchFromCache($url, TRUE)) {
       print "Loading partial data from cache.\n";
-      $data = json_decode(file_get_contents($partialPath));
-      $i = $data->PAGER;
-      unset($data->PAGER);
+      $i = $this->extractPager($data);
     }
 
-    $data = [];
+    // Fetch each page.
     do {
       print "Fetching page $i.\n";
       try {
         $page = $this->doFetchPage($url);
       }
       catch (BadResponseException $e) {
+        // If a request failed all its retries, write the data with its pager
+        // to the partial cache.
         if ($i > 0 && $e->getCode() === 503) {
-          $data['PAGER'] = $i;
+          $this->insertPager($data, $i);
           print "Writing partial data...\n";
-          file_put_contents($partialPath, json_encode($data));
+          $this->writeToCache($url, $data, TRUE);
         }
         die("Failed to fetch data on page $i.\n");
       }
 
+      // Follow the pager to the next page of the results.
       if (!empty($page->next)) {
+        // Note that due to a views or Drupal.org bug, the URI of the pager has
+        // a typo.
         $url = str_replace('api-d7/node', 'api-d7/node.json', $page->next);
       }
       $data = array_merge($data, $page->list);
@@ -139,7 +187,7 @@ class Fetcher {
       // Cap the number of pages we fetch at 200 so Neil doesn't ban us.
     } while (($i < 200) && (!empty($page->next)));
 
-    file_put_contents($filePath, json_encode($data));
+    $this->writeToCache($url);
     return $data;
   }
 
