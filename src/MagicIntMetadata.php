@@ -14,11 +14,11 @@ class MagicIntMetadata {
    */
   public static $project = [
     'core' => 3060,
-    'au' => 2997874,
-    'pb' => 1143512,
+    'automatic_updates' => 2997874,
+    'project_browser' => 1143512,
     'olivero' => 3083133,
     'claro' => 3020054,
-    'cke5' => 3159840,
+    'ckeditor5' => 3159840,
   ];
 
   /**
