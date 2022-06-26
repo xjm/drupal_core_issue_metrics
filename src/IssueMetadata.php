@@ -33,6 +33,9 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   the issue query.
    */
   public function setVersions(array $branches) {
+    if (empty($branches)) {
+      return;
+    }
     foreach ($branches as $index => $branch) {
       $branches[$index] = static::validateBranch($branch, TRUE);
     }
@@ -43,7 +46,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
    * Alias for setVersions().
    */
   public function setBranches(array $branches) {
-    $this->setVersions();
+    $this->setVersions($branches);
   }
 
   /**
@@ -55,6 +58,9 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   defined in the magic metadata (like 'bug' or 'task').
    */
   public function setCategories(array $categories) {
+    if (empty($categories)) {
+      return;
+    }
     $data = static::validateData($categories, static::$metadata::$type);
     $this->categories = $data;
   }
@@ -68,6 +74,9 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   defined in the magic metadata (like 'bug' or 'task').
    */
   public function setTypes(array $categories) {
+    if (empty($categories)) {
+      return;
+    }
     $this->setCategories($categories);
   }
 
@@ -80,6 +89,9 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   defined in the magic metadata (like 'critical' or 'major').
    */
   public function setPriorities(array $priorities) {
+    if (empty($priorities)) {
+      return;
+    }
     $data = static::validateData($priorities, static::$metadata::$priority);
     $this->priorities = $data;
   }
@@ -93,6 +105,9 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   defined in the magic metadata (like 'critical' or 'major').
    */
   public function setStatuses(array $statuses) {
+    if (empty($statuses)) {
+      return;
+    }
     $data = static::validateData($statuses, static::$metadata::$status);
     $this->statuses = $data;
   }
@@ -109,6 +124,9 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   NONE OF the given tags (TRUE). Defaults to FALSE.
    */
   public function setTaxonomyData(array $terms, $exclude = FALSE) {
+    if (empty($terms)) {
+      return;
+    }
     $data = static::validateData($terms, static::$metadata::$tids);
     $this->tids = $data;
     $this->excludeTerms = $exclude;
@@ -121,6 +139,9 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   The issue components to select, e.g. 'views.module' or 'media system'.
    */
   public function setComponents(array $components) {
+    if (empty($components)) {
+      return;
+    }
     $this->components = $components;
   }
 
