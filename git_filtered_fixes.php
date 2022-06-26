@@ -18,12 +18,12 @@ $runner = new QueryRunner($query);
 $results = $runner->getResults();
 
 $parser = new GitLogParser('9.4.x');
-$nids = $parser->getNids();
+$commits = array_keys($parser->getParsedCommits());
 
 $fixed_issues = [];
 
 foreach ($results as $row) {
-  if (in_array($row['nid'], $nids)) {
+  if (in_array($row['nid'], $commits)) {
     $fixed_issues[$row['nid']] = $row;
   }
 }

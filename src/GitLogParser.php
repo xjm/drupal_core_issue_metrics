@@ -12,6 +12,11 @@ class GitLogParser {
   const REPOSITORY_PATH = '../../';
 
   /**
+   * Whether to parse by issue ID or git commit hash.
+   */
+  protected bool $byIssue = TRUE;
+
+  /**
    * Directory names for up-to-date git clones, within static::REPOSITORY_PATH.
    */
   protected static array $repositoryNames = [
@@ -27,6 +32,13 @@ class GitLogParser {
    * The raw git log output.
    */
   protected string $rawLog;
+
+  /**
+   * The array of parsed commit messages, keyed by node ID or hash.
+   *
+   * @var string[]
+   */
+  protected array $parsedCommits = [];
 
   /**
    * The "official" start dates for each core branch, in ISO 8601.
@@ -84,7 +96,7 @@ class GitLogParser {
       $before = new \DateTime('now');
     }
 
-    $this->command = "git log $branch --format='%s' "
+    $this->command = "git log $branch --format='HASH:%H:MESSAGE:%s:ENDCOMMIT' "
       . " --after=" . $after->format('Y-m-d')
       . " --before=" . $before->format('Y-m-d');
 
@@ -112,29 +124,41 @@ class GitLogParser {
   }
 
   /**
-   * Returns the unique node IDs for the branch.
+   * Returns the unique node IDs or git hashes for the branch.
    */
-  public function getNids() {
-    return array_unique($this->nids);
+  public function getParsedCommits() {
+    return $this->parsedCommits;
   }
 
   /**
    * Parses the git log messages into issues.
    */
   protected function parseLog() {
-    if (empty($this->rawLog)) {
-      throw new \UnexpectedValueException('The log must not be empty');
+    if (empty($this->rawLog) || !strpos($this->rawLog,':ENDCOMMIT')) {
+      throw new \UnexpectedValueException('The git log was empty or in an unexpected format.');
     }
-    $regex = "/^Issue #([0-9]+)/";
-    $commits = explode("\n", $this->rawLog);
-    $nids = [];
+    $commits = explode(":ENDCOMMIT\n", $this->rawLog);
+    $parsedCommits = [];
+    // For core or other repsitories that use the core standard git log
+    // format, filter the git log to only commits referencing a node ID.
+    if ($this->byIssue) {
+      $regex = '/^HASH:([0-9a-fA-F]+):MESSAGE:Issue #([0-9]+)( by ([^:])+)?(:.*)?$/';
+      $idMatchIndex = 2;
+      $messageMatchIndex = 5;
+    }
+    // Otherwise, select all commits and index by commit hash.
+    else {
+      $regex = '/^HASH:([0-9a-fA-F]+):MESSAGE:(.*)/$';
+      $idMatchIndex = 1;
+      $messageMatchIndex = 2;
+    }
     foreach ($commits as $commit) {
       $matches = [];
       if (preg_match($regex, $commit, $matches)) {
-        $nids[] = $matches[1];
+        $parsedCommits[$matches[$idMatchIndex]] = $matches[$messageMatchIndex];
       }
     }
-    $this->nids = $nids;
+    $this->parsedCommits = $parsedCommits;
   }
 
 }

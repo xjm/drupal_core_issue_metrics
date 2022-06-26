@@ -19,6 +19,20 @@ class MagicIntMetadata {
     'olivero' => 3083133,
     'claro' => 3020054,
     'ckeditor5' => 3159840,
+    'jsonapi' => 2723491,
+  ];
+
+  /**
+   * Dates projects were added to core, in ISO 8601.
+   *
+   * This data can be used to select historical data for core projects
+   * developed in contrib.
+   */
+  public static $coreAddDates = [
+    'ckeditor5' => '2021-11-11',
+    'olivero' => '2020-10-16',
+    'claro' => '2019-10-13',
+    'jsonapi' => '2019-03-20',
   ];
 
   /**
