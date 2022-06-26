@@ -2,12 +2,12 @@
 
 namespace Drupal\core_metrics;
 
-use \PDO;
-
 /**
  * Queries issue data.
  */
 class IssueQuery {
+
+  use ValidateBranchTrait;
 
   /**
    * The static issue metadata IDs.
@@ -80,7 +80,7 @@ class IssueQuery {
    */
   public static function getFixRelevantBranches($branch) {
     // Validate the branch and cast it to git format (e.g. 9.4.x).
-    static::$metadata::validateBranch($branch, FALSE);
+    static::validateBranch($branch, FALSE);
 
     // Since we know the structure, we can get the major and minor by exploding
     // on '.'.
