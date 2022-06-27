@@ -12,6 +12,11 @@ class GitLogParser {
   const REPOSITORY_PATH = '../../';
 
   /**
+   * The static issue metadata IDs.
+   */
+  protected static MagicIntMetadata $magic;
+
+  /**
    * Whether to parse by issue ID or git commit hash.
    */
   protected bool $byIssue = TRUE;
@@ -21,6 +26,15 @@ class GitLogParser {
    */
   protected static array $repositoryNames = [
     'core' => 'drupal',
+    'automatic_updates' => 'automatic_updates',
+    'project_browser' => 'project_browser',
+    'ckeditor5' => 'ckeditor5',
+    'composer-stager' => 'composer-stager',
+    'composer-integration' => 'composer-integration',
+    'php-tuf' => 'php-tuf',
+    'olivero' => 'olivero',
+    'claro' => 'claro',
+    'jsonapi' => 'jsonapi',
   ];
 
   /**
@@ -41,32 +55,6 @@ class GitLogParser {
   protected array $parsedCommits = [];
 
   /**
-   * The "official" start dates for each core branch, in ISO 8601.
-   *
-   * @var string[]
-   */
-  private static array $branchDates = [
-    '8.0.x' => '2011-03-08',
-    '8.1.x' => '2015-12-11',
-    '8.2.x' => '2016-03-02',
-    '8.3.x' => '2016-08-02',
-    '8.4.x' => '2017-01-27',
-    '8.5.x' => '2017-07-28',
-    '8.6.x' => '2018-01-12',
-    '8.7.x' => '2018-07-13',
-    '8.8.x' => '2019-03-07',
-    '8.9.x' => '2019-10-10',
-    '9.0.x' => '2019-10-10',
-    '9.1.x' => '2020-04-01',
-    '9.2.x' => '2020-10-16',
-    '9.3.x' => '2021-05-01',
-    '9.4.x' => '2021-10-29',
-    '10.0.x' => '2021-11-30',
-    '9.5.x' => '2022-04-29',
-    '10.1.x' => '2022-06-27',
-  ];
-
-  /**
    * Constructs a new git log parser.
    *
    * @param string $branch
@@ -84,19 +72,35 @@ class GitLogParser {
    */
   public function __construct(protected string $branch, protected string $project = 'core', protected \DateTime|null $after = NULL, protected \DateTime|null $before = NULL)
   {
+    static::$magic = new MagicIntMetadata();
+
+    if ($this->project !== 'core') {
+      $this->byIssue = FALSE;
+    }
+
     // Validate and sanitize the branch name.
-    $this->branch = static::validateBranch($branch);
+    if ($this->project === 'core') {
+      $this->branch = static::validateCoreBranch($branch);
+    }
+    else {
+      $this->branch = static::sanitizeBranch($branch);
+    }
 
     // If no start date was passed, use the oldest data for the branch.
     if (empty($after)) {
-      $after = new \DateTime(static::$branchDates[$branch]);
+      $after = new \DateTime(static::$magic::$branchDates[$branch]);
     }
-    // If no end date was passed, use now.
+    // If no end date was passed, use the core commit date, or now for core.
     if (empty($before)) {
-      $before = new \DateTime('now');
+      if (($project === 'core') || empty(static::$magic::$coreAddDates[$project])) {
+        $before = new \DateTime('now');
+      }
+      else {
+        $before = new \DateTime(static::$magic::$coreAddDates[$project]);
+      }
     }
 
-    $this->command = "git log $branch --format='HASH:%H:MESSAGE:%s:ENDCOMMIT' "
+    $this->command = "git log $branch --format='HASH:%H:MESSAGE:%s:ENDCOMMIT'"
       . " --after=" . $after->format('Y-m-d')
       . " --before=" . $before->format('Y-m-d');
 
@@ -104,11 +108,14 @@ class GitLogParser {
     // to static::REPOSITORY_PATH, as listed in static::$repositoryNames, or
     // an arbitrary, sanitized project directory name.
     $repositoryName = !empty(static::$repositoryNames[$project])
-      ? static::$repositoryNames[$project]
+      ? static::sanitizeDirectoryName(static::$repositoryNames[$project])
       : static::sanitizeDirectoryName($project);
 
-    chdir(__DIR__ . '/' . static::REPOSITORY_PATH . '/' . $repositoryName);
-    $this->rawLog = shell_exec($this->command);
+    $path =  __DIR__ . '/' . static::REPOSITORY_PATH . $repositoryName;
+    if (!chdir($path)) {
+      throw new \Exception("Invalid path: $path\n");
+    }
+    $this->rawLog = shell_exec($this->command) ?? '';
     $this->parseLog();
   }
 
@@ -119,12 +126,12 @@ class GitLogParser {
    *   The directory name of the directory containing a git repository. For
    *   example, 'drupal' or 'olivero'.
    */
-  protected static function sanitizeDirectoryName($directory) {
+  protected static function sanitizeDirectoryName(string $directory) {
     return preg_replace('/[^A-Za-z0-9_\-]/', '_', $directory);
   }
 
   /**
-   * Returns the unique node IDs or git hashes for the branch.
+   * Returns the commits, indexed by unique node IDs or git hashes.
    */
   public function getParsedCommits() {
     return $this->parsedCommits;
@@ -134,8 +141,8 @@ class GitLogParser {
    * Parses the git log messages into issues.
    */
   protected function parseLog() {
-    if (empty($this->rawLog) || !strpos($this->rawLog,':ENDCOMMIT')) {
-      throw new \UnexpectedValueException('The git log was empty or in an unexpected format.');
+    if (!empty($this->rawLog) && !strpos($this->rawLog,':ENDCOMMIT')) {
+      throw new \UnexpectedValueException('The git log was in an unexpected format.');
     }
     $commits = explode(":ENDCOMMIT\n", $this->rawLog);
     $parsedCommits = [];
@@ -148,7 +155,7 @@ class GitLogParser {
     }
     // Otherwise, select all commits and index by commit hash.
     else {
-      $regex = '/^HASH:([0-9a-fA-F]+):MESSAGE:(.*)/$';
+      $regex = '/^HASH:([0-9a-fA-F]+):MESSAGE:(.*)$/';
       $idMatchIndex = 1;
       $messageMatchIndex = 2;
     }

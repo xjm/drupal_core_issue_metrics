@@ -36,6 +36,47 @@ class MagicIntMetadata {
   ];
 
   /**
+   * Core-targeted git branches of contrib projects.
+   */
+  public static $contribBranches = [
+    'automatic_updates' => '8.x-2.x',
+    'project_browser' => '1.0.x',
+    'ckeditor5' => '1.0.x',
+    'composer-stager' => 'develop',
+    'composer-integration' => 'main',
+    'php-tuf' => 'main',
+    'olivero' => 'core-patch',
+    'claro' => '8.x-2.x',
+    'jsonapi' => '8.x-2.x',
+  ];
+
+  /**
+   * The "official" start dates for each core branch, in ISO 8601.
+   *
+   * @var string[]
+   */
+  public static array $branchDates = [
+    '8.0.x' => '2011-03-08',
+    '8.1.x' => '2015-12-11',
+    '8.2.x' => '2016-03-02',
+    '8.3.x' => '2016-08-02',
+    '8.4.x' => '2017-01-27',
+    '8.5.x' => '2017-07-28',
+    '8.6.x' => '2018-01-12',
+    '8.7.x' => '2018-07-13',
+    '8.8.x' => '2019-03-07',
+    '8.9.x' => '2019-10-10',
+    '9.0.x' => '2019-10-10',
+    '9.1.x' => '2020-04-01',
+    '9.2.x' => '2020-10-16',
+    '9.3.x' => '2021-05-01',
+    '9.4.x' => '2021-10-29',
+    '10.0.x' => '2021-11-30',
+    '9.5.x' => '2022-04-29',
+    '10.1.x' => '2022-06-27',
+  ];
+
+  /**
    * Issue statuses.
    */
   public static $status = [

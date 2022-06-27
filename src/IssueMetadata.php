@@ -37,7 +37,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
       return;
     }
     foreach ($branches as $index => $branch) {
-      $branches[$index] = static::validateBranch($branch, TRUE);
+      $branches[$index] = static::validateCoreBranch($branch, TRUE);
     }
     $this->versions = $branches;
   }
