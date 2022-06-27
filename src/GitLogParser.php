@@ -100,7 +100,7 @@ class GitLogParser {
       }
     }
 
-    $this->command = "git log $branch --format='HASH:%H:MESSAGE:%s:ENDCOMMIT'"
+    $this->command = "git log $branch --format=':::GIT_HASH:::%H:::GIT_DATE:::%as:::GIT_MESSAGE:::%s:::GIT_ENDCOMMIT:::'"
       . " --after=" . $after->format('Y-m-d')
       . " --before=" . $before->format('Y-m-d');
 
@@ -141,28 +141,33 @@ class GitLogParser {
    * Parses the git log messages into issues.
    */
   protected function parseLog() {
-    if (!empty($this->rawLog) && !strpos($this->rawLog,':ENDCOMMIT')) {
+    if (!empty($this->rawLog) && !strpos($this->rawLog,':::GIT_ENDCOMMIT:::')) {
       throw new \UnexpectedValueException('The git log was in an unexpected format.');
     }
-    $commits = explode(":ENDCOMMIT\n", $this->rawLog);
+    $commits = explode(":::GIT_ENDCOMMIT:::\n", $this->rawLog);
     $parsedCommits = [];
     // For core or other repsitories that use the core standard git log
     // format, filter the git log to only commits referencing a node ID.
     if ($this->byIssue) {
-      $regex = '/^HASH:([0-9a-fA-F]+):MESSAGE:Issue #([0-9]+)( by ([^:])+)?(:.*)?$/';
-      $idMatchIndex = 2;
-      $messageMatchIndex = 5;
+      $regex = '/^:::GIT_HASH:::([0-9a-fA-F]+):::GIT_DATE:::([0-9]{4}-[0-9]{2}-[0-9]{2}):::GIT_MESSAGE:::Issue #([0-9]+)( by ([^:])+)?(:(.*))?$/';
+      $idMatchIndex = 3;
+      $dateMatchIndex = 2;
+      $messageMatchIndex = 7;
     }
     // Otherwise, select all commits and index by commit hash.
     else {
-      $regex = '/^HASH:([0-9a-fA-F]+):MESSAGE:(.*)$/';
+      $regex = '/^:::GIT_HASH:::([0-9a-fA-F]+):::GIT_DATE:::([0-9]{4}-[0-9]{2}-[0-9]{2}):::GIT_MESSAGE:::(.*)$/';
       $idMatchIndex = 1;
-      $messageMatchIndex = 2;
+      $dateMatchIndex = 2;
+      $messageMatchIndex = 3;
     }
     foreach ($commits as $commit) {
       $matches = [];
       if (preg_match($regex, $commit, $matches)) {
-        $parsedCommits[$matches[$idMatchIndex]] = $matches[$messageMatchIndex];
+        $parsedCommits[$matches[$idMatchIndex]] = [
+          'date' => $matches[$dateMatchIndex],
+          'message' => $matches[$messageMatchIndex],
+        ];
       }
     }
     $this->parsedCommits = $parsedCommits;

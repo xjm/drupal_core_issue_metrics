@@ -18,24 +18,27 @@ $runner = new QueryRunner($query);
 $results = $runner->getResults();
 
 $parser = new GitLogParser('10.0.x');
-$commits = array_keys($parser->getParsedCommits());
+$commits = $parser->getParsedCommits();
+$nodeIds = array_keys($commits);
 
-$fixed_issues = [];
+$fixedIssues = [];
 
+// Strip commits not tied to an issue.
 foreach ($results as $row) {
-  if (in_array($row['nid'], $commits)) {
-    $fixed_issues[$row['nid']] = $row;
+  if (in_array($row['nid'], $nodeIds)) {
+    $fixedIssues[$row['nid']] = $row;
   }
 }
 
-print '"nid","Title","Type","Priority","Component"' . "\n";
-foreach ($fixed_issues as $issue) {
-  $issue_row = [
+print '"nid","Date","Title","Type","Priority","Component"' . "\n";
+foreach ($fixedIssues as $issue) {
+  $issueRow = [
     $issue['nid'],
+    $commits[$issue['nid']]['date'],
     str_replace('"','',$issue['title']),
     $types[$issue['category']],
     $priorities[$issue['priority']],
     $issue['component'],
   ];
-  print '"' . implode('","', $issue_row) . "\"\n";
+  print '"' . implode('","', $issueRow) . "\"\n";
 }

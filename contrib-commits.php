@@ -16,13 +16,18 @@ foreach ($magic::$contribBranches as $project => $branch) {
   $projectCommits[$project] = $parser->getParsedCommits();
 }
 
-print '"Project","Commit ID","Message"' . "\n";
+$rows = [];
+print '"Project","Date","Commit ID","Message"' . "\n";
 foreach ($projectCommits as $project => $commits) {
-  foreach ($commits as $id => $message) {
-    $issueRows[] = '"' . $project . '","' . $id . '","'
-      . str_replace('"','',$message)
-      . '"';
+  foreach ($commits as $id => $commit) {
+    $columns = [
+      $project,
+      $commit['date'],
+      $id,
+      str_replace('"', '', $commit['message']),
+    ];
+    $rows[] = '"' . implode('","', $columns) . '"';
   }
 }
 
-print implode("\n", $issueRows);
+print implode("\n", $rows);
