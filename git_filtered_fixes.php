@@ -13,11 +13,11 @@ $priorities = array_flip($metadata::$priority);
 $types = array_flip($metadata::$type);
 
 $query = new IssueQuery();
-$query->findIssuesFixedIn('9.4.x');
+$query->findIssuesFixedIn('10.0.x');
 $runner = new QueryRunner($query);
 $results = $runner->getResults();
 
-$parser = new GitLogParser('9.4.x');
+$parser = new GitLogParser('10.0.x');
 $commits = array_keys($parser->getParsedCommits());
 
 $fixed_issues = [];
