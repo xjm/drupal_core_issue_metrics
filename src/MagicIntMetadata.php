@@ -20,6 +20,9 @@ class MagicIntMetadata {
     'claro' => 3020054,
     'ckeditor5' => 3159840,
     'jsonapi' => 2723491,
+    'decoupled_menus' => 3181806,
+    'a11y_autocomplete' => 3196355,
+    'once' => 3195030,
   ];
 
   /**
