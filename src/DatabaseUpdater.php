@@ -16,9 +16,12 @@ class DatabaseUpdater {
   protected static string $dbPath = '../data/issue_data.sqlite';
 
   /**
-   * Constructs a new database updater.
+   * Constructs a new database, or returns the current one if it exists.
+   *
+   * @param \SQLite3 $db = NULL
+   *   The database.
    */
-  public function __construct(SQLite3 $db = NULL) {
+  public function __construct(?SQLite3 $db = NULL): void {
     if ($db === NULL) {
       $db = new SQLite3(__DIR__ . '/' . static::$dbPath);
     }
@@ -27,8 +30,11 @@ class DatabaseUpdater {
 
   /**
    * Writes data from a branch/type result set to the database.
+   *
+   * @param mixed $data
+   *   The decoded JSON data.
    */
-  public function writeData($data) {
+  public function writeData($data): void {
     print "Writing data for up to " . sizeof($data) . " issues...\n";
     $pdo = new PDO('sqlite:' . __DIR__ . '/' . static::$dbPath);
     foreach ($data as $datum) {
@@ -62,7 +68,7 @@ class DatabaseUpdater {
   /**
    * Drops the tables.
    */
-  public function dropTables() {
+  public function dropTables(): void {
     $this->db->exec('DROP TABLE issue_data;');
     $this->db->exec('DROP TABLE nid_tid;');
   }
@@ -70,7 +76,7 @@ class DatabaseUpdater {
   /**
    * Truncates the tables.
    */
-  public function truncateTables() {
+  public function truncateTables(): void {
     $this->db->exec('DELETE FROM issue_data;');
     $this->db->exec('DELETE FROM nid_tid;');
   }
@@ -78,7 +84,7 @@ class DatabaseUpdater {
   /**
    * Recreates the tables.
    */
-  public function createTables() {
+  public function createTables(): void {
     $create['issue_table'] = 'CREATE TABLE issue_data('
       . 'nid INTEGER PRIMARY KEY, '
       . 'created INTEGER, '

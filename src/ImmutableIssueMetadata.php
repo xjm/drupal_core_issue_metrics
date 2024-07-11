@@ -80,6 +80,9 @@ class ImmutableIssueMetadata {
    *   'nw' and 'postponed', or 'task' and 'feature', etc.).
    * @param string[] $valid
    *   The valid MagicIntMetadata strings accepted for the given context.
+   *
+   * @throws \UnexpectedValueException
+   *   If the provided data format is not valid.
    */
   protected static function validateData(array $data, array $valid) {
     // If the user passed string labels, convert them to integer IDs.
@@ -105,7 +108,7 @@ class ImmutableIssueMetadata {
    * @return string[]
    *   The issue types to select.
    */
-  public function getCategories() {
+  public function getCategories(): array {
     return $this->categories;
   }
 
@@ -115,7 +118,7 @@ class ImmutableIssueMetadata {
    * @return string[]
    *   The issue types to select.
    */
-  public function getTypes() {
+  public function getTypes(): array {
     return $this->categories;
   }
 
@@ -125,14 +128,14 @@ class ImmutableIssueMetadata {
    * @return string[]
    *   The branches to select.
    */
-  public function getVersions() {
+  public function getVersions(): array {
     return $this->versions;
   }
 
   /**
    * Alias for getVersions().
    */
-  public function getBranches() {
+  public function getBranches(): array {
     return $this->getVersions();
   }
 
@@ -142,7 +145,7 @@ class ImmutableIssueMetadata {
    * @return string[]
    *   The issue types to select.
    */
-  public function getPriorities() {
+  public function getPriorities(): array {
     return $this->priorities;
   }
 
@@ -152,7 +155,7 @@ class ImmutableIssueMetadata {
    * @return string[]
    *   The issue types to select.
    */
-  public function getStatuses() {
+  public function getStatuses(): array {
     return $this->statuses;
   }
 
@@ -162,7 +165,7 @@ class ImmutableIssueMetadata {
    * @return string[]
    *   The issue types to select.
    */
-  public function getComponents() {
+  public function getComponents(): array {
     return $this->components;
   }
 
@@ -172,7 +175,7 @@ class ImmutableIssueMetadata {
    * @return string[]
    *   The term IDs to use for filtering.
    */
-  public function getTids() {
+  public function getTids(): array {
     return $this->tids;
   }
 
@@ -183,7 +186,7 @@ class ImmutableIssueMetadata {
    *   TRUE if the terms should all be excluded, or FALSE if they should all be
    *   included.
    */
-  public function excludeTerms() {
+  public function excludeTerms(): bool {
     return $this->excludeTerms;
   }
 

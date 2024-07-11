@@ -69,6 +69,9 @@ class GitLogParser {
    * @param DateTime $before
    *   (optional) The end date for the data (only data before the date will be
    *   included.) If NULL, all the most recent data will be included.
+   *
+   * @throws \Exception
+   *   If the Git repository is not found at the expected path.
    */
   public function __construct(protected string $branch, protected string $project = 'core', protected \DateTime|null $after = NULL, protected \DateTime|null $before = NULL)
   {
@@ -125,22 +128,28 @@ class GitLogParser {
    * @param string $directory
    *   The directory name of the directory containing a git repository. For
    *   example, 'drupal' or 'olivero'.
+   *
+   * @return string
+   *   The sanitized name.
    */
-  protected static function sanitizeDirectoryName(string $directory) {
+  protected static function sanitizeDirectoryName(string $directory): string {
     return preg_replace('/[^A-Za-z0-9_\-]/', '_', $directory);
   }
 
   /**
    * Returns the commits, indexed by unique node IDs or git hashes.
    */
-  public function getParsedCommits() {
+  public function getParsedCommits(): array {
     return $this->parsedCommits;
   }
 
   /**
    * Parses the git log messages into issues.
+   *
+   * @throws \UnexpectedValueException
+   *   Thrown if the git log was in an unexpected format.
    */
-  protected function parseLog() {
+  protected function parseLog(): void {
     if (!empty($this->rawLog) && !strpos($this->rawLog,':::GIT_ENDCOMMIT:::')) {
       throw new \UnexpectedValueException('The git log was in an unexpected format.');
     }

@@ -32,7 +32,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   The branch names. '-dev' will be appended automatically if needed for
    *   the issue query.
    */
-  public function setVersions(array $branches) {
+  public function setVersions(array $branches): void {
     if (empty($branches)) {
       return;
     }
@@ -45,7 +45,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
   /**
    * Alias for setVersions().
    */
-  public function setBranches(array $branches) {
+  public function setBranches(array $branches): void {
     $this->setVersions($branches);
   }
 
@@ -57,7 +57,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   IDs. If they are strings, they are assumed to be shorthand labels as
    *   defined in the magic metadata (like 'bug' or 'task').
    */
-  public function setCategories(array $categories) {
+  public function setCategories(array $categories): void {
     if (empty($categories)) {
       return;
     }
@@ -73,7 +73,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   IDs. If they are strings, they are assumed to be shorthand labels as
    *   defined in the magic metadata (like 'bug' or 'task').
    */
-  public function setTypes(array $categories) {
+  public function setTypes(array $categories): void {
     if (empty($categories)) {
       return;
     }
@@ -88,7 +88,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   IDs. If they are strings, they are assumed to be shorthand labels as
    *   defined in the magic metadata (like 'critical' or 'major').
    */
-  public function setPriorities(array $priorities) {
+  public function setPriorities(array $priorities): void {
     if (empty($priorities)) {
       return;
     }
@@ -104,7 +104,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   IDs. If they are strings, they are assumed to be shorthand labels as
    *   defined in the magic metadata (like 'critical' or 'major').
    */
-  public function setStatuses(array $statuses) {
+  public function setStatuses(array $statuses): void {
     if (empty($statuses)) {
       return;
     }
@@ -123,7 +123,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *   Whether to search for issues that include ALL the given tags (FALSE), or
    *   NONE OF the given tags (TRUE). Defaults to FALSE.
    */
-  public function setTaxonomyData(array $terms, $exclude = FALSE) {
+  public function setTaxonomyData(array $terms, $exclude = FALSE): void {
     if (empty($terms)) {
       return;
     }
@@ -138,7 +138,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
    * @param string[] $components
    *   The issue components to select, e.g. 'views.module' or 'media system'.
    */
-  public function setComponents(array $components) {
+  public function setComponents(array $components): void {
     if (empty($components)) {
       return;
     }

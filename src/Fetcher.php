@@ -25,14 +25,14 @@ class Fetcher {
   /**
    * Gets the stored data from the response.
    */
-  public function getData() {
+  public function getData(): array {
     return $this->data;
   }
 
   /**
    * Fetches data from the URLs.
    */
-  public function fetch() {
+  public function fetch(): void {
     foreach ($this->issueRequest->getUrls() as $branch => $url) {
       print "Fetching {$this->issueRequest->getType()} data for $branch.\n";
       $this->data[$branch] =  $this->doFetch($url);
@@ -41,8 +41,11 @@ class Fetcher {
 
   /**
    * Fetches all requested data set from the cache only.
+   *
+   * @throws \Exception
+   *   When the branh data is unavailable.
    */
-  public function fetchAllFromCache() {
+  public function fetchAllFromCache(): void {
     foreach ($this->issueRequest->getUrls() as $branch => $url) {
       $this->data[$branch] = $this->fetchFromCache($url);
       if (empty($this->data[$branch])) {
@@ -53,11 +56,15 @@ class Fetcher {
 
   /**
    * Fetches one data set from the cache only.
+   *
    * @param string $url
    *   The Drupal.org query URL.
    * @param bool $partial
    *   (optional) Whether to write to the partial data path. Defaults to FALSE.
-  */
+   *
+   * @return mixed
+   *   JSON-decoded data.
+   */
   public function fetchFromCache(string $url, bool $partial = FALSE) {
       $name = static::getCacheFileName($url);
       $path = $partial ? static::getPartialFilePath($name) : static::getCacheFilePath($name);
@@ -75,8 +82,8 @@ class Fetcher {
    *   The data to encode for storage.
    * @param bool $partial
    *   (optional) Whether to write to the partial data path. Defaults to FALSE.
-  */
-  public function writeToCache(string $url, $data, $partial = FALSE) {
+   */
+  public function writeToCache(string $url, $data, $partial = FALSE): void {
       $name = static::getCacheFileName($url);
       $path = $partial ? static::getPartialFilePath($name) : static::getCacheFilePath($name);
     file_put_contents($path, json_encode($data));
@@ -87,8 +94,11 @@ class Fetcher {
    *
    * @param mixed $data
    *   The data loaded from the partial cache.
+   *
+   * @return int $pager
+   *   The pager value.
    */
-  public function extractPager($data) {
+  public function extractPager($data): int {
     $pager = $data->PAGER;
     unset($data->PAGER);
     return $pager;
@@ -102,7 +112,7 @@ class Fetcher {
    * @param int pager
    *   The page of the result set that failed.
    */
-  public function insertPager($data, $pager) {
+  public function insertPager($data, int $pager): void {
     $data['PAGER'] = $i;
   }
 
@@ -111,8 +121,11 @@ class Fetcher {
    *
    * @param string $url
    *   The URL of the issue request.
+   *
+   * @return string
+   *   The file name to use for the cache.
    */
-  protected static function getCacheFileName(string $url) {
+  protected static function getCacheFileName(string $url): string {
     return preg_replace('/[^A-Za-z0-9_\-]/', '_', $url) . '_' . date('Y-W') . '.txt';
   }
 
@@ -120,9 +133,12 @@ class Fetcher {
    * Constructs the path to the cache file.
    *
    * @param string $fileName
-   *   The filename.
+   *   The file name.
+   *
+   * @return string
+   *   The file path.
    */
-  protected static function getCacheFilePath(string $fileName) {
+  protected static function getCacheFilePath(string $fileName): string {
     return __DIR__ . '/../cache/' . $fileName;
   }
 
@@ -130,8 +146,12 @@ class Fetcher {
    * Constructs the path to the partial cache file.
    *
    * @param string $fileName
+   *   The file name.
+   *
+   * @return string
+   *   The file path to the partial cache..
    */
-  protected static function getPartialFilePath(string $fileName) {
+  protected static function getPartialFilePath(string $fileName): string {
     return __DIR__ . '/../cache/partial/' . $fileName;
   }
 
@@ -140,8 +160,11 @@ class Fetcher {
    *
    * @param string $url
    *   The URL of page 0.
+   *
+   * @return mixed
+   *   JSON response data.
    */
-  protected function doFetch($url) {
+  protected function doFetch(string $url) {
     // Return data from the cache if it is available.
     $cache = $this->fetchFromCache($url);
     if (!empty($cache)) {
@@ -196,8 +219,14 @@ class Fetcher {
    *
    * @param string $url
    *   The URL to fetch.
+   *
+   * @return mixed
+   *   The JSON-decoded response body.
+   *
+   * @throws \GuzzleHttp\Exception\BasResponseException
+   *   If Guzzle gives us a bad response code other than a 503.
    */
-  protected function doFetchPage($url) {
+  protected function doFetchPage(string $url) {
     try {
       $response = $this->client->request('GET', $url);
     }

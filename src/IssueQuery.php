@@ -24,14 +24,14 @@ class IssueQuery {
   /**
    * Gets an immutable copy of the current issue metadata.
    */
-  public function getMetadata() {
+  public function getMetadata(): ImmutableIssueMetadata {
     return new ImmutableIssueMetadata($this->metadata);
   }
 
   /**
    * Configures the query to find open, untriaged critical bugs.
    */
-  public function findUntriagedCriticalBugs() {
+  public function findUntriagedCriticalBugs(): void {
     $this->metadata->setTypes(['bug']);
     $this->metadata->setPriorities(['critical']);
     $this->metadata->setTaxonomyData(['triaged_critical', 'critical_triage_deferred'], TRUE);
@@ -52,7 +52,7 @@ class IssueQuery {
    * @param array $priorities
    *   (optional) The issue priorities to select. Ignored if empty.
    */
-  public function findIssuesFixedIn($branch, array $types = [], array $priorities = []) {
+  public function findIssuesFixedIn($branch, array $types = [], array $priorities = []): void {
     $branches = static::getFixRelevantBranches($branch);
     $this->metadata->setBranches($branches);
     $this->metadata->setStatuses(static::$magic::$fixed);
@@ -78,7 +78,7 @@ class IssueQuery {
    * backports, list the branches manually or compare the list of issue IDs to
    * the commit log.
    */
-  public static function getFixRelevantBranches($branch) {
+  public static function getFixRelevantBranches($branch): array {
     // Validate the branch and cast it to git format (e.g. 9.4.x).
     static::validateCoreBranch($branch, FALSE);
 
