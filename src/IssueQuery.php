@@ -88,14 +88,16 @@ class IssueQuery {
 
     // Valid minors for Drupal 8 are 8.0.x through 8.9.x.
     // Valid minors for Drupal 9 are 9.0.x through 9.5.x.
-    // Assume Drupal 10 and higher will be similar to Drupal 9, since going
-    // forward we plan to issue a new major release with every major release of
-    // Symfony.
+    // Drupal 10 will have maintenance minors that may go as high as 10.6 (or
+    // higher), but those have not yet been released.
     if ($major === 8) {
       $max_minor = 9;
     }
-    if ($major >= 9) {
+    if ($major === 9) {
       $max_minor = 5;
+    }
+    if ($major === 10) {
+      $max_minor = 7;
     }
     if ($minor > $max_minor) {
       throw new \UnexpectedValueException("'$branch' is not a valid Drupal core branch.");
@@ -147,17 +149,44 @@ class IssueQuery {
       $branches[] = '9.3.x';
       $branches[] = '9.4.x';
       $branches[] = '9.5.x';
+      // 10.0.x and 10.1.x were also open at the same time.
+      $branches[] = '10.1.x';
     }
 
-    // Drupal 9.5.x will receive commits alongside 10.1.x and 10.2.x.
-    if (($major === 10) && ($minor <= 2)) {
-      $branches[] = '9.5.x';
-    }
+    // After Drupal 10.1 we changed our branching policy use '11.x' as the main
+    // branch. It was created in May 2023, just before 9.5 and 10.0 stopped
+    // receiving bugfix support.
     if ($branch === '9.5.x') {
       $branches[] = '10.0.x';
-      // @todo Uncomment when these branches open.
-      // $branches[] = '10.1.x';
-      // $branches[] = '10.2.x';
+      $branches[] = '10.1.x';
+      $branches[] = '11.x';
+    }
+
+    if ($branch === '10.1.x') {
+      $branches[] = '9.5.x';
+      $branches[] = '10.0.x';
+      $branches[] = '10.1.x';
+      $branches[] = '11.x';
+    }
+
+    // Add 11.x to every D10 development phase from that point on.
+    if ($major > 10 || ($major === 10 && $minor ==> 2)) {
+      $branches[] = '11.x';
+    }
+
+    // Much of 10.3.x development was done in 11.x only, but 11.0.x and 10.4.x
+    // were opened in the spring.
+    if ($branch === '10.3.x') {
+      $branches[] = '10.4.x';
+      $branches[] = '11.0.x';
+    }
+
+    // Going forward, 11.1.x will be paired with 10.4.x (but 11.1.x does not
+    // open until immediately before the alpha deadline). 10.3.x receives
+    // bugfixes before 10.4.x's release.
+    if ($major === 10 && $minor ==> 4) {
+      $branches[] = $major . '.' .  $minor - 1 . '.x';
+      $branches[] = $major + 1 . '.' .  $minor - 3 . '.x';
     }
 
     return array_unique($branches);
