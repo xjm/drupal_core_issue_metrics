@@ -35,7 +35,7 @@ class Fetcher {
   public function fetch(): void {
     foreach ($this->issueRequest->getUrls() as $branch => $url) {
       print "Fetching {$this->issueRequest->getType()} data for $branch.\n";
-      $this->data[$branch] =  $this->doFetch($url);
+      $this->data[$branch] = $this->doFetch($url);
     }
   }
 
@@ -43,13 +43,13 @@ class Fetcher {
    * Fetches all requested data set from the cache only.
    *
    * @throws \Exception
-   *   When the branh data is unavailable.
+   *   When the branch data is unavailable.
    */
   public function fetchAllFromCache(): void {
     foreach ($this->issueRequest->getUrls() as $branch => $url) {
       $this->data[$branch] = $this->fetchFromCache($url);
       if (empty($this->data[$branch])) {
-        throw new \Exception("Data for branch $branch is not available in the cache. Fetch it first.");
+        throw new \Exception("Data for branch $branch fetched from URL $url is not available in the cache. Fetch it first.");
       }
     }
   }
@@ -177,7 +177,7 @@ class Fetcher {
     $data = [];
 
     // Load partial data from the cache if it is available, starting with the
-    // first failed page
+    // first failed page.
     if (!empty($data = $this->fetchFromCache($url, TRUE))) {
       print "Loading partial data from cache.\n";
       $i = $this->extractPager($data);
