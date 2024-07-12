@@ -62,15 +62,16 @@ class Fetcher {
    * @param bool $partial
    *   (optional) Whether to write to the partial data path. Defaults to FALSE.
    *
-   * @return mixed
+   * @return mixed[]
    *   JSON-decoded data.
    */
-  public function fetchFromCache(string $url, bool $partial = FALSE) {
-      $name = static::getCacheFileName($url);
-      $path = $partial ? static::getPartialFilePath($name) : static::getCacheFilePath($name);
+  public function fetchFromCache(string $url, bool $partial = FALSE): array {
+    $name = static::getCacheFileName($url);
+    $path = $partial ? static::getPartialFilePath($name) : static::getCacheFilePath($name);
     if (file_exists($path)) {
       return json_decode(file_get_contents($path));
     }
+    return [];
   }
 
   /**
@@ -177,7 +178,7 @@ class Fetcher {
 
     // Load partial data from the cache if it is available, starting with the
     // first failed page
-    if ($data = $this->fetchFromCache($url, TRUE)) {
+    if (!empty($data = $this->fetchFromCache($url, TRUE))) {
       print "Loading partial data from cache.\n";
       $i = $this->extractPager($data);
     }
