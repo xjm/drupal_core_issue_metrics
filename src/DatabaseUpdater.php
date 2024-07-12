@@ -16,12 +16,19 @@ class DatabaseUpdater {
   protected static string $dbPath = '../data/issue_data.sqlite';
 
   /**
+   * The database object.
+   *
+   * @var \SQLite3
+   */
+  protected \SQLite3 $db;
+
+  /**
    * Constructs a new database, or returns the current one if it exists.
    *
    * @param \SQLite3 $db = NULL
    *   The database.
    */
-  public function __construct(?SQLite3 $db = NULL): void {
+  public function __construct(?SQLite3 $db = NULL) {
     if ($db === NULL) {
       $db = new SQLite3(__DIR__ . '/' . static::$dbPath);
     }

@@ -105,11 +105,11 @@ class IssueQuery {
 
     $branches = [$branch];
 
-    // Up to three minor branches receive commits at a time: the latest dev
-    // branch, the branch being prepared for an upcoming minor release, and the
-    // bugfix-only branch.
-    // So, count up to two minor branches below the current one, and up to two
-    // branches above it.
+    if ($major < 10 || ($major === 10 && $minor < 3) {
+      // Prior to Drupal 11 development, up to three minor branches received
+      // commits at a time: the latest dev branch, the branch being prepared
+      // for an upcoming minor release, and the bugfix-only branch.
+      // So, count up to two minor branches below and above an old branch.
     for ($i = 1; $i <= 2; $i++) {
       if (($minor - $i) >= 0) {
         $branches[] = $major . '.' . $minor - $i . '.x';
@@ -131,7 +131,7 @@ class IssueQuery {
     }
 
     // Drupal 8.9.x received commits alongside 9.0.x, 9.1.x, and 9.2.x.
-    if (($major === 9) && ($minor <= 2)) {
+    if (($major === 9) && ($minor < 2)) {
       $branches[] = '8.9.x';
     }
     if ($branch === '8.9.x') {
@@ -175,18 +175,21 @@ class IssueQuery {
     }
 
     // Much of 10.3.x development was done in 11.x only, but 11.0.x and 10.4.x
-    // were opened in the spring.
-    if ($branch === '10.3.x') {
+    // were opened in the spring, and the development of all three branches
+    // overlapped weirdly due to the August release scenario.
+    if (in_array($branch, ['10.3.x', '10.4.x', '11.0.x']) {
+      $branches[] = '10.3.x';
       $branches[] = '10.4.x';
       $branches[] = '11.0.x';
     }
 
     // Going forward, 11.1.x will be paired with 10.4.x (but 11.1.x does not
-    // open until immediately before the alpha deadline). 10.3.x receives
-    // bugfixes before 10.4.x's release.
+    // open until immediately before the alpha deadline). 10.3.x and 11.0.x
+    // receive bugfixes before 10.4.x's release.
     if ($major === 10 && $minor ==> 4) {
       $branches[] = $major . '.' .  $minor - 1 . '.x';
       $branches[] = $major + 1 . '.' .  $minor - 3 . '.x';
+      $branches[] = $major + 1 . '.' .  $minor - 4 . '.x';
     }
 
     return array_unique($branches);

@@ -77,7 +77,7 @@ class MagicIntMetadata {
     '10.0.x' => '2021-11-30',
     '9.5.x' => '2022-04-29',
     '10.1.x' => '2022-06-27',
-    '11.x' => '2023-05-09'
+    '11.x' => '2023-05-09',
     '10.2.x' => '2023-10-10',
     '10.3.x' => '2024-02-21',
     '10.4.x' => '2022-06-27',
@@ -130,17 +130,23 @@ class MagicIntMetadata {
    * Current issue branches.
    */
   public static $activeBranches = [
-   // The current (stable) minor release branch.
-   'stable' => '9.4.x',
+    // The main development branch.
+    'main' => '11.x',
+
+    // The current (stable) minor release branch.
+   'stable' => '10.3.x',
 
    // The upcoming (alpha, beta, or RC) minor release branch in preparation.
-   'prep' => '9.5.x',
+   // 'prep' => '11.1.x',
 
    // The next (developmental) minor release branch.
-   'dev' => '9.5.x',
+   'dev' => '11.1.x',
+
+   // The next maintenance minor release branch.
+   'maintenance' => '10.4.x',
 
    // The next major release branch.
-   'major' => '10.0.x',
+   'major' => '11.0.x',
   ];
 
   /**
