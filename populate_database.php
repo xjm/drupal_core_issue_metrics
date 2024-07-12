@@ -19,7 +19,6 @@ $updater = new DatabaseUpdater();
 $updater->dropTables();
 $updater->createTables();
 
-$types = ['plan'];
 foreach ($types as $type) {
   $fetcher = new Fetcher(new IssueRequest($branches, $type), new Client());
   $fetcher->fetchAllFromCache();
