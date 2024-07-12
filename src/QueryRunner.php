@@ -49,8 +49,11 @@ class QueryRunner {
 
   /**
    * Executes the query and returns all results.
+   *
+   * @return array
+   *   The results from the database.
    */
-  public function getResults() {
+  public function getResults(): array {
     $statement = $this->db->prepare($this->queryString);
     $statement->execute($this->queryParameters);
     return $statement->fetchAll();
@@ -59,7 +62,7 @@ class QueryRunner {
   /**
    * Assembles the query based on the metadata.
    */
-  protected function assembleQueryString() {
+  protected function assembleQueryString(): void {
     $queryParameters = [];
 
     $filters = [];
