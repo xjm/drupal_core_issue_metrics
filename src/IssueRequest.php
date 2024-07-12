@@ -44,22 +44,31 @@ class IssueRequest {
 
   /**
    * Gets the array of API request URLs.
+   *
+   * @return string[]
+   *   An array of URL strings.
    */
-  public function getUrls() {
+  public function getUrls(): array {
     return $this->urls;
   }
 
   /**
-   * Gets the array of branches
+   * Gets the array of branches.
+   *
+   * @return string[]
+   *   An array of branch strings.
    */
-  public function getBranches() {
+  public function getBranches(): array {
     return $this->branches;
   }
 
   /**
    * Gets the issue type.
+   *
+   * @return string
+   *   The issue type string.
    */
-  public function getType() {
+  public function getType(): string {
     return $this->type;
   }
 
