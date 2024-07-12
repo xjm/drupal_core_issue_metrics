@@ -63,13 +63,13 @@ class Fetcher {
    *   (optional) Whether to write to the partial data path. Defaults to FALSE.
    *
    * @return mixed[]
-   *   JSON-decoded data.
+   *   JSON-decoded data, cast to an array.
    */
   public function fetchFromCache(string $url, bool $partial = FALSE): array {
     $name = static::getCacheFileName($url);
     $path = $partial ? static::getPartialFilePath($name) : static::getCacheFilePath($name);
     if (file_exists($path)) {
-      return json_decode(file_get_contents($path));
+      return (array) json_decode(file_get_contents($path));
     }
     return [];
   }
@@ -85,8 +85,10 @@ class Fetcher {
    *   (optional) Whether to write to the partial data path. Defaults to FALSE.
    */
   public function writeToCache(string $url, $data, $partial = FALSE): void {
-      $name = static::getCacheFileName($url);
-      $path = $partial ? static::getPartialFilePath($name) : static::getCacheFilePath($name);
+    $name = static::getCacheFileName($url);
+    $path = $partial ? static::getPartialFilePath($name) : static::getCacheFilePath($name);
+    $message = $partial ? "Writing partial data to cache..." : "Writing to cache.";
+    print "$message\n";
     file_put_contents($path, json_encode($data));
   }
 
@@ -100,8 +102,8 @@ class Fetcher {
    *   The pager value.
    */
   public function extractPager($data): int {
-    $pager = $data->PAGER;
-    unset($data->PAGER);
+    $pager = $data['PAGER'];
+    unset($data['PAGER']);
     return $pager;
   }
 
@@ -111,10 +113,11 @@ class Fetcher {
    * @param mixed $data
    *   The data loaded from the partial cache.
    * @param int pager
-   *   The page of the result set that failed.
+   *   The page of the result set that needs to be completed next.
    */
-  public function insertPager($data, int $pager): void {
-    $data['PAGER'] = $i;
+  public function insertPager($data, int $pager): array {
+    $data['PAGER'] = $pager;
+    return $data;
   }
 
   /**
@@ -166,6 +169,8 @@ class Fetcher {
    *   JSON response data.
    */
   protected function doFetch(string $url) {
+    $main_url = $url;
+
     // Return data from the cache if it is available.
     $cache = $this->fetchFromCache($url);
     if (!empty($cache)) {
@@ -174,6 +179,7 @@ class Fetcher {
     }
     // Otherwise, cache results locally.
     $i = 0;
+    $fetches = 0;
     $data = [];
 
     // Load partial data from the cache if it is available, starting with the
@@ -193,9 +199,8 @@ class Fetcher {
         // If a request failed all its retries, write the data with its pager
         // to the partial cache.
         if ($i > 0 && $e->getCode() === 503) {
-          $this->insertPager($data, $i);
-          print "Writing partial data...\n";
-          $this->writeToCache($url, $data, TRUE);
+          $data = $this->insertPager($data, $i);
+          $this->writeToCache($main_url, $data, TRUE);
         }
         die("Failed to fetch data on page $i.\n");
       }
@@ -208,10 +213,19 @@ class Fetcher {
       }
       $data = array_merge($data, $page->list);
       $i++;
+      $fetches++;
       // Cap the number of pages we fetch at 200 so Neil doesn't ban us.
-    } while (($i < 200) && (!empty($page->next)));
+    } while (($fetches < 200) && (!empty($page->next)));
 
-    $this->writeToCache($url);
+    // Write to the regular cache if we got through all the pages, or the
+    // partial cache if we didn't.
+    if (!empty($page->next)) {
+      $data = $this->insertPager($data, $i);
+      $this->writeToCache($main_url, $data, TRUE);
+    }
+    else {
+      $this->writeToCache($main_url, $data);
+    }
     return $data;
   }
 
