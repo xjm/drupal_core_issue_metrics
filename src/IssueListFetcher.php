@@ -6,11 +6,9 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 
 /**
- * Fetches results for a given Drupal.org request object.
- *
- * @see https://www.drupal.org/drupalorg/docs/apis/rest-and-other-apis
+ * Fetches results for a given Drupal.org issue request.
  */
-class IssueFetcher extends FetcherBase {
+class IssueListFetcher extends FetcherBase {
 
   /**
    * {@inheritdoc}

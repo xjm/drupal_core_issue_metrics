@@ -7,7 +7,7 @@ namespace Drupal\core_metrics;
  *
  * @see https://www.drupal.org/drupalorg/docs/apis/rest-and-other-apis
  */
-class IssueRequest implements RequestInterface {
+class IssueListRequest implements RequestInterface {
 
   /**
    * The static issue metadata.
