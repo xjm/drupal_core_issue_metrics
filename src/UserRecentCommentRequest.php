@@ -3,11 +3,11 @@
 namespace Drupal\core_metrics;
 
 /**
- * Builds a REST API query for Drupal.org issues.
+ * Builds a REST API query for Drupal.org comments.
  *
  * @see https://www.drupal.org/drupalorg/docs/apis/rest-and-other-apis
  */
-class IssueRequest implements RequestInterface {
+class UserRecentCommentRequest implements RequestInterface {
 
   /**
    * The static issue metadata.
