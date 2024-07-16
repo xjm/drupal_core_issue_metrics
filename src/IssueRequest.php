@@ -7,12 +7,7 @@ namespace Drupal\core_metrics;
  *
  * @see https://www.drupal.org/drupalorg/docs/apis/rest-and-other-apis
  */
-class IssueRequest {
-
-  /**
-   * The base URL for querying core issue metadata.
-   */
-  const URL = 'https://www.drupal.org/api-d7/node.json?type=project_issue&field_project=3060';
+class IssueRequest implements RequestInterface {
 
   /**
    * The static issue metadata.
@@ -33,7 +28,7 @@ class IssueRequest {
   public function __construct(protected array $branches, public string $type) {
     static::$metadata = new MagicIntMetadata();
 
-    $url_base = static::URL
+    $url_base = static::getBaseUrl();
       . '&field_issue_category='
       . static::$metadata::$type[$type];
 
@@ -43,14 +38,26 @@ class IssueRequest {
   }
 
   /**
-   * Gets the array of API request URLs.
-   *
-   * @return string[]
-   *   An array of URL strings.
+   * {@inheritdoc}
+   */
+  public static function getBaseUrl(): string {
+    return 'https://www.drupal.org/api-d7/node.json?type=project_issue&field_project=3060';
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getUrls(): array {
     return $this->urls;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getType(): string {
+    return $this->type;
+  }
+
 
   /**
    * Gets the array of branches.
@@ -60,16 +67,6 @@ class IssueRequest {
    */
   public function getBranches(): array {
     return $this->branches;
-  }
-
-  /**
-   * Gets the issue type.
-   *
-   * @return string
-   *   The issue type string.
-   */
-  public function getType(): string {
-    return $this->type;
   }
 
 }

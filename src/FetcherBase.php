@@ -6,11 +6,11 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 
 /**
- * Fetches results for a given IssueRequest object.
+ * Fetches results for a given Drupal.org request object.
  *
  * @see https://www.drupal.org/drupalorg/docs/apis/rest-and-other-apis
  */
-class Fetcher {
+abstract class FetcherBase {
 
   /**
    * The result data.
@@ -20,7 +20,16 @@ class Fetcher {
   /**
    * Constructs a new fetcher.
    */
-  public function __construct(protected IssueRequest $issueRequest, protected Client $client) {}
+  public function __construct(protected RequestInterface $requestGroup, protected Client $client) {}
+
+  /**
+   * Indicates whether we have fetched all the relevant pages.
+   *
+   * @return bool
+   *   TRUE if we are done fetching based on the fetcher's properties, or false
+   *   otherwise.
+   */
+  abstract protected function isFetchComplete(): bool;
 
   /**
    * Gets the stored data from the response.
@@ -33,9 +42,9 @@ class Fetcher {
    * Fetches data from the URLs.
    */
   public function fetch(): void {
-    foreach ($this->issueRequest->getUrls() as $branch => $url) {
-      print "Fetching {$this->issueRequest->getType()} data for $branch.\n";
-      $this->data[$branch] = $this->doFetch($url);
+    foreach ($this->requestGroup->getUrls() as $singleRequest => $url) {
+      print "Fetching {$this->requestGroup->getType()} data for $singleRequest.\n";
+      $this->data[$singleRequest] = $this->doFetch($url);
     }
   }
 
@@ -43,13 +52,13 @@ class Fetcher {
    * Fetches all requested data set from the cache only.
    *
    * @throws \Exception
-   *   When the branch data is unavailable.
+   *   When the request data is unavailable in the cache.
    */
   public function fetchAllFromCache(): void {
-    foreach ($this->issueRequest->getUrls() as $branch => $url) {
-      $this->data[$branch] = $this->fetchFromCache($url);
-      if (is_null($this->data[$branch])) {
-        throw new \Exception("Data for branch $branch fetched from URL $url is not available in the cache. Fetch it first.");
+    foreach ($this->requestGroup->getUrls() as $singleRequest => $url) {
+      $this->data[$singleRequest] = $this->fetchFromCache($url);
+      if (is_null($this->data[$singleRequest])) {
+        throw new \Exception("Data for $singleRequest fetched from URL $url is not available in the cache. Fetch it first.");
       }
     }
   }
@@ -209,13 +218,13 @@ class Fetcher {
       if (!empty($page->next)) {
         // Note that due to a views or Drupal.org bug, the URI of the pager has
         // a typo.
-        $url = str_replace('api-d7/node', 'api-d7/node.json', $page->next);
+        $url = preg_replace('|api-d7/([a-z]+)|', 'api-d7/$1.json', $page->next);
       }
       $data = array_merge($data, $page->list);
       $i++;
       $fetches++;
       // Cap the number of pages we fetch at 200 so Neil doesn't ban us.
-    } while (($fetches < 200) && (!empty($page->next)));
+    } while (($fetches < 200) && !$this->isFetchComplete());
 
     // Write to the regular cache if we got through all the pages, or the
     // partial cache if we didn't.

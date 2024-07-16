@@ -8,31 +8,13 @@ use \SQLite3;
 /**
  * Updates the local SQLite issue database with the latest issue data.
  */
-class DatabaseUpdater {
+class IssueDatabaseUpdater extends DatabaseUpdaterBase {
 
   /**
    * The relative path to the SQLite database file.
    */
-  protected static string $dbPath = '../data/issue_data.sqlite';
-
-  /**
-   * The database object.
-   *
-   * @var \SQLite3
-   */
-  protected \SQLite3 $db;
-
-  /**
-   * Constructs a new database, or returns the current one if it exists.
-   *
-   * @param \SQLite3 $db = NULL
-   *   The database.
-   */
-  public function __construct(?SQLite3 $db = NULL) {
-    if ($db === NULL) {
-      $db = new SQLite3(__DIR__ . '/' . static::$dbPath);
-    }
-    $this->db = $db;
+  protected static function getDbPath(): string {
+    return '../data/issue_data.sqlite';
   }
 
   /**
@@ -43,7 +25,7 @@ class DatabaseUpdater {
    */
   public function writeData($data): void {
     print "Writing data for up to " . sizeof($data) . " issues...\n";
-    $pdo = new PDO('sqlite:' . __DIR__ . '/' . static::$dbPath);
+    $pdo = new PDO('sqlite:' . __DIR__ . '/' . static::getDbPath());
     foreach ($data as $datum) {
       $queries[] = 'INSERT OR IGNORE INTO issue_data '
         . '(nid, created, changed, status, priority, category, version, title, component) '
@@ -70,22 +52,6 @@ class DatabaseUpdater {
         $this->db->exec($query);
       }
     }
-  }
-
-  /**
-   * Drops the tables.
-   */
-  public function dropTables(): void {
-    $this->db->exec('DROP TABLE issue_data;');
-    $this->db->exec('DROP TABLE nid_tid;');
-  }
-
-  /**
-   * Truncates the tables.
-   */
-  public function truncateTables(): void {
-    $this->db->exec('DELETE FROM issue_data;');
-    $this->db->exec('DELETE FROM nid_tid;');
   }
 
   /**

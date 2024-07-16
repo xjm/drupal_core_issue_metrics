@@ -3,8 +3,8 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 use GuzzleHttp\Client;
-use Drupal\core_metrics\Fetcher;
-use Drupal\core_metrics\DatabaseUpdater;
+use Drupal\core_metrics\IssueFetcher;
+use Drupal\core_metrics\IssueDatabaseUpdater;
 use Drupal\core_metrics\IssueQuery;
 use Drupal\core_metrics\IssueRequest;
 use Drupal\core_metrics\MagicIntMetadata;
@@ -15,12 +15,12 @@ $branches = $magic::$activeBranches;
 $types = ['bug', 'task', 'feature', 'plan'];
 $data = [];
 
-$updater = new DatabaseUpdater();
+$updater = new IssueDatabaseUpdater();
 $updater->dropTables();
 $updater->createTables();
 
 foreach ($types as $type) {
-  $fetcher = new Fetcher(new IssueRequest($branches, $type), new Client());
+  $fetcher = new IssueFetcher(new IssueRequest($branches, $type), new Client());
   $fetcher->fetchAllFromCache();
   $data = $fetcher->getData();
 
