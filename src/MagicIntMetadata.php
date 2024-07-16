@@ -11,8 +11,10 @@ class MagicIntMetadata {
 
   /**
    * Project repos.
+   *
+   * @var int[]
    */
-  public static $project = [
+  public static array $project = [
     'core' => 3060,
     'automatic_updates' => 2997874,
     'project_browser' => 1143512,
@@ -30,8 +32,10 @@ class MagicIntMetadata {
    *
    * This data can be used to select historical data for core projects
    * developed in contrib.
+   *
+   * @var string[]
    */
-  public static $coreAddDates = [
+  public static array $coreAddDates = [
     'ckeditor5' => '2021-11-11',
     'olivero' => '2020-10-16',
     'claro' => '2019-10-13',
@@ -40,8 +44,10 @@ class MagicIntMetadata {
 
   /**
    * Core-targeted git branches of contrib projects.
+   *
+   * @var string[]
    */
-  public static $contribBranches = [
+  public static array $contribBranches = [
     'automatic_updates' => '8.x-2.x',
     'project_browser' => '1.0.x',
     'ckeditor5' => '1.0.x',
@@ -80,13 +86,15 @@ class MagicIntMetadata {
     '11.x' => '2023-05-09',
     '10.2.x' => '2023-10-10',
     '10.3.x' => '2024-02-21',
-    '10.4.x' => '2022-06-27',
+    '10.4.x' => '2024-06-27',
   ];
 
   /**
    * Issue statuses.
+   *
+   * @var int[]
    */
-  public static $status = [
+  public static array $status = [
     'active' => 1,
     'nw' => 13,
     'nr'  => 8,
@@ -98,18 +106,24 @@ class MagicIntMetadata {
 
   /**
    * The fixed statuses.
+   *
+   * @var int[]
    */
-  public static $fixed = [2, 7];
+  public static array $fixed = [2, 7];
 
   /**
    * The relevant open statuses.
+   *
+   * @var int[]
    */
-  public static $open = [1, 13, 8, 14, 4];
+  public static array $open = [1, 13, 8, 14, 4];
 
   /**
    * Issue priorities.
+   *
+   * @var int[]
    */
-  public static $priority = [
+  public static array $priority = [
    'critical' => 400,
    'major' => 300,
    'normal' => 200,
@@ -118,8 +132,10 @@ class MagicIntMetadata {
 
   /**
    * Issue types.
+   *
+   * @var int[]
    */
-  public static $type = [
+  public static array $type = [
     'bug' => 1,
     'task' => 2,
     'plan' => 5,
@@ -128,8 +144,10 @@ class MagicIntMetadata {
 
   /**
    * Current issue branches.
-   */
-  public static $activeBranches = [
+    *
+   * @var string[]
+  */
+  public static array $activeBranches = [
     // The main development branch.
     'main' => '11.x',
 
@@ -153,8 +171,10 @@ class MagicIntMetadata {
    * Issue tag term IDs.
    *
    * These term IDs will be found in taxonomy_vocabularly_9.
+   *
+   * @var int[]
    */
-  public static $tids = [
+  public static array $tids = [
     'triaged_critical' => 197921,
     'triaged_major' => 174642,
     'critical_triage_deferred' => 197925,
@@ -174,6 +194,11 @@ class MagicIntMetadata {
     'api_first' => 177096,
   ];
 
+  /**
+   *  User IDs.
+   *
+   * @var int[]
+  */
   public static $uids = [
     'dries' => 1,
     'alexpott' => 157725,
@@ -197,20 +222,39 @@ class MagicIntMetadata {
     'system_message' => 180064,
   ];
 
+  /**
+   * Framework manager usernames.
+   *
+   * @var string[]
+  * /
   public static $fm = ['alexpott', 'effulgentsia', 'catch', 'larowlan'];
-  public static $fefm = ['lauriii', 'bnjmnm', 'ckrina'];
-  public static $rm = ['catch', 'xjm', 'quietone'];
-  public static $pm = ['dries', 'webchick', 'yoroy', 'gabor'];
-  public static $js = ['nod_', 'justafish'];
 
-  public static $dat = [
-    'gabor',
-    'effulgentsia',
-    'wim',
-    'xjm',
-    'timplunkett',
-    'tedbow',
-    // ...
-  ];
+  /**
+   * Frontend framework manager usernames.
+   *
+   * @var string[]
+   */
+  public static $fefm = ['bnjmnm', 'ckrina', 'justafish', 'nod_'];
+
+  /**
+   * Release manager usernames.
+   *
+   * @var string[]
+   */
+  public static $rm = ['catch', 'xjm', 'quietone', 'longwave'];
+
+  /**
+   * Product manager usernames.
+   *
+   * @var string[]
+   */
+  public static $pm = ['dries', 'gabor', 'lauriii'];
+
+  /**
+   * JavaScript package committer usernames.
+   *
+   * @var string[]
+   */
+  public static $js = ['nod_', 'justafish'];
 
 }
