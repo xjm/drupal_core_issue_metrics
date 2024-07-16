@@ -48,7 +48,7 @@ class Fetcher {
   public function fetchAllFromCache(): void {
     foreach ($this->issueRequest->getUrls() as $branch => $url) {
       $this->data[$branch] = $this->fetchFromCache($url);
-      if (empty($this->data[$branch])) {
+      if (is_null($this->data[$branch])) {
         throw new \Exception("Data for branch $branch fetched from URL $url is not available in the cache. Fetch it first.");
       }
     }
