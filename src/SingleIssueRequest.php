@@ -3,11 +3,11 @@
 namespace Drupal\core_metrics;
 
 /**
- * Builds a REST API query for Drupal.org comments.
+ * Builds a REST API query for a single Drupal.org node.
  *
  * @see https://www.drupal.org/drupalorg/docs/apis/rest-and-other-apis
  */
-class UserRecentCommentRequest implements RequestInterface {
+class SingleIssueRequest implements RequestInterface {
 
   /**
    * The static issue metadata.
@@ -20,24 +20,29 @@ class UserRecentCommentRequest implements RequestInterface {
   protected array $urls;
 
   /**
-   * Constructs a new user comment query URL.
+   * Constructs a new issue query URL.
    */
-  public function __construct(protected int $uid) {
+  public function __construct(protected array $nodeIds) {
     static::$metadata = new MagicIntMetadata();
+    $baseUrl = $this->getBaseUrl();
+
+    foreach ($nodeIds as $nodeId) {
+      $this->urls[$nodeId] = $baseUrl . $nodeId . '.json?drupalorg_extra_credit=1';
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function getBaseUrl(): string {
-    return "https://www.drupal.org/api-d7/comment.json?author=" . $this->uid . "&sort=created&direction=DESC";
+    return 'https://www.drupal.org/api-d7/node/';
   }
 
   /**
    * {@inheritdoc}
    */
   public function getUrls(): array {
-    return ['recent comments' => $this->getBaseUrl()];
+    return $this->urls;
   }
 
   /**

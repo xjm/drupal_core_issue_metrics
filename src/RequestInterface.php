@@ -15,7 +15,7 @@ interface RequestInterface {
    * @return string
    *   The base URL for the request query.
    */
-  public static function getBaseUrl(): string;
+  public function getBaseUrl(): string;
 
   /**
    * Gets the array of API request URLs.

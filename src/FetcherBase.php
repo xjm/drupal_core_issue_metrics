@@ -25,11 +25,14 @@ abstract class FetcherBase {
   /**
    * Indicates whether we have fetched all the relevant pages.
    *
+   * @param mixed $page
+   *   The current page data for the request.
+   *
    * @return bool
    *   TRUE if we are done fetching based on the fetcher's properties, or false
    *   otherwise.
    */
-  abstract protected function isFetchComplete(): bool;
+  abstract protected function isFetchComplete($page): bool;
 
   /**
    * Gets the stored data from the response.
@@ -220,15 +223,17 @@ abstract class FetcherBase {
         // a typo.
         $url = preg_replace('|api-d7/([a-z]+)|', 'api-d7/$1.json', $page->next);
       }
-      $data = array_merge($data, $page->list);
+      // If there is a list of data, use that; otherwise, use the whole page.
+      $pageData = empty($page->list) ? [$page] : $page->list;
+      $data = array_merge($data, $pageData);
       $i++;
       $fetches++;
       // Cap the number of pages we fetch at 200 so Neil doesn't ban us.
-    } while (($fetches < 200) && !$this->isFetchComplete());
+    } while (($fetches < 200) && !$this->isFetchComplete($page));
 
     // Write to the regular cache if we got through all the pages, or the
     // partial cache if we didn't.
-    if (!empty($page->next)) {
+    if (!$this->isFetchComplete($page)) {
       $data = $this->insertPager($data, $i);
       $this->writeToCache($main_url, $data, TRUE);
     }

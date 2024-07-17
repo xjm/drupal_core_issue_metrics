@@ -5,7 +5,7 @@ namespace Drupal\core_metrics;
 /**
  * Fetches results for a given Drupal.org issue request.
  */
-class IssueListFetcher extends FetcherBase {
+class SingleIssueFetcher extends FetcherBase {
 
   /**
    * {@inheritdoc}

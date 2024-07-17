@@ -231,7 +231,7 @@ class MagicIntMetadata {
     'HeroDevs' => 3379320,
     'Salsa Digital' => 2603032,
     'Zoocha' => 2377277,
-    'OPTASY' => 2603032,
+    'OPTASY' => 2765755,
   ];
 
   /**

@@ -28,19 +28,19 @@ class IssueListRequest implements RequestInterface {
   public function __construct(protected array $branches, public string $type) {
     static::$metadata = new MagicIntMetadata();
 
-    $url_base = static::getBaseUrl();
+    $baseUrl = $this->getBaseUrl()
       . '&field_issue_category='
       . static::$metadata::$type[$type];
 
     foreach ($branches as $branch) {
-      $this->urls[$branch] = $url_base . '&field_issue_version='. $branch . '-dev';
+      $this->urls[$branch] = $baseUrl . '&field_issue_version='. $branch . '-dev';
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function getBaseUrl(): string {
+  public function getBaseUrl(): string {
     return 'https://www.drupal.org/api-d7/node.json?type=project_issue&field_project=3060';
   }
 
