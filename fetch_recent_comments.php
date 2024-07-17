@@ -24,14 +24,16 @@ $data = $fetcher->getData();
 // Collect organization and issue data from the comments.
 $dataByOrg = [];
 $nodeIds = [];
-$lastWeekNumber = date('W') - 1;
-$yearLastWeek = date('Y', strtotime('1 week ago'));
+$mondayLastWeek = date('M d, Y', strtotime('last Monday', strtotime('1 week ago')));
+$mondayThisWeek = date('M d, Y', strtotime('last Monday'));
+$mondayLastWeekTimestamp = strtotime($mondayLastWeek);
+$mondayThisWeekTimestamp = strtotime($mondayThisWeek);
 
 // array_pop() because recent comment requests are a single type.
 foreach (array_pop($data) as $comment) {
   if (!empty($comment->field_attribute_contribution_to)) {
     foreach ($comment->field_attribute_contribution_to as $org) {
-      if ((date('W', $comment->created) == $lastWeekNumber) && ($yearLastWeek == date('Y', $comment->created))) {
+        if ($comment->created >= $mondayLastWeekTimestamp && ($comment->created < $mondayThisWeekTimestamp)) {
         $nid = $comment->node->id;
         $dataByOrg[$org->id][$comment->node->id] = $nid;
         $nodeIds[$nid] = $nid;
@@ -62,7 +64,6 @@ foreach ($issueData as $nodeId => $issue) {
 
 print "\n\n";
 
-$mondayLastWeek = date('M d, Y', strtotime('last Monday', strtotime('1 week ago')));
 $orgLabels = array_flip(MagicIntMetadata::$orgs);
 foreach ($dataByOrg as $orgId => $issues) {
   print "# Isues attributed to " . $orgLabels[$orgId] . " for the week of $mondayLastWeek\n\n";
