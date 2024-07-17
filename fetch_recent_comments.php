@@ -10,7 +10,10 @@ use Drupal\core_metrics\UserRecentCommentFetcher;
 use Drupal\core_metrics\UserRecentCommentRequest;
 
 // Fetch recent data for xjm.
-$username = 'xjm';
+if (empty($argv[1])) {
+  die("A username is required. Script usage:\nphp fetch_recent_comments.php xjm\n");
+}
+$username = $argv[1];
 
 // Get the data from d.o.
 $uid = MagicIntMetadata::$uids[$username];
