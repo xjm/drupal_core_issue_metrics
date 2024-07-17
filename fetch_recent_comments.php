@@ -27,8 +27,8 @@ $data = $fetcher->getData();
 // Collect organization and issue data from the comments.
 $dataByOrg = [];
 $nodeIds = [];
-$mondayLastWeek = date('M d, Y', strtotime('last Monday', strtotime('1 week ago')));
-$mondayThisWeek = date('M d, Y', strtotime('last Monday'));
+$mondayLastWeek = date('F d, Y', strtotime('last Monday', strtotime('1 week ago')));
+$mondayThisWeek = date('F d, Y', strtotime('last Monday'));
 $mondayLastWeekTimestamp = strtotime($mondayLastWeek);
 $mondayThisWeekTimestamp = strtotime($mondayThisWeek);
 
