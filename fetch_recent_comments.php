@@ -69,7 +69,7 @@ print "\n\n";
 
 $orgLabels = array_flip(MagicIntMetadata::$orgs);
 foreach ($dataByOrg as $orgId => $issues) {
-  print "# Isues attributed to " . $orgLabels[$orgId] . " for the week of $mondayLastWeek\n\n";
+  print "# Issues attributed to " . $orgLabels[$orgId] . " by $username for the week of $mondayLastWeek\n\n";
   foreach (['Fixed' => $fixed, 'Open' => $open] as $label => $list) {
     print "## $label issues\n";
     foreach ($issues as $nodeId) {
