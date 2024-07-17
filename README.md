@@ -33,7 +33,7 @@ Reference: https://www.drupal.org/drupalorg/docs/apis/rest-and-other-apis
 # Retrieve core issue contribution data for a user from the previous week
 
 ```
-php fetch_recent_comments.php
+php fetch_recent_comments.php xjm
 ```
 
 Fixed issues are filtered to those issues credited to the individual. Open
