@@ -24,13 +24,25 @@ $fetcher->fetch();
 $fetcher->fetchAllFromCache();
 $data = $fetcher->getData();
 
+// Fetch data between Mondays.
+$mondayLastWeek = date('F d, Y', strtotime('last Monday'));
+
+// If today is Monday, fetch the recent week's data instead.
+if (date('N') === '1') {
+  $mondayThisWeek = date('F d, Y');
+}
+// Otherwise, fetch data between the previous Mondays.
+else {
+  $mondayThisWeek = $mondayLastWeek;
+  $mondayLastWeek = date('F d, Y', strtotime('last Monday', strtotime('1 week ago')));
+}
+
+$mondayLastWeekTimestamp = strtotime($mondayLastWeek);
+$mondayThisWeekTimestamp = strtotime($mondayThisWeek);
+
 // Collect organization and issue data from the comments.
 $dataByOrg = [];
 $nodeIds = [];
-$mondayLastWeek = date('F d, Y', strtotime('last Monday', strtotime('1 week ago')));
-$mondayThisWeek = date('F d, Y', strtotime('last Monday'));
-$mondayLastWeekTimestamp = strtotime($mondayLastWeek);
-$mondayThisWeekTimestamp = strtotime($mondayThisWeek);
 
 // array_pop() because recent comment requests are a single type.
 foreach (array_pop($data) as $comment) {
