@@ -17,7 +17,7 @@ class SingleIssueRequest implements RequestInterface {
   /**
    * The constructed URLs for the queries.
    */
-  protected array $urls;
+  protected array $urls = [];
 
   /**
    * Constructs a new issue query URL.
