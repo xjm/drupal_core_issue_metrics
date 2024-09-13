@@ -152,7 +152,7 @@ class MagicIntMetadata {
     'main' => '11.x',
 
     // The current (stable) minor release branch.
-   'stable' => '10.3.x',
+   'stable' => '11.0.x',
 
    // The upcoming (alpha, beta, or RC) minor release branch in preparation.
    // 'prep' => '11.1.x',
@@ -164,7 +164,7 @@ class MagicIntMetadata {
    'maintenance' => '10.4.x',
 
    // The next major release branch.
-   'major' => '11.0.x',
+   'major' => '12.0.x',
   ];
 
   /**
@@ -213,6 +213,7 @@ class MagicIntMetadata {
     'larowlan' => 395439,
     'lauriii' => 1078742,
     'moshe' => 23,
+    'nod_' => 598310,
     'plach' => 183211,
     'timplunkett' => 241634,
     'webchick' => 24967,
