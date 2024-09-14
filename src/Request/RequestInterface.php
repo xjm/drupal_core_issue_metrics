@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\core_metrics;
+namespace Drupal\core_metrics\Request;
 
 /**
  * Builds a REST API query for Drupal.org issues.

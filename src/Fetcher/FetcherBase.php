@@ -1,7 +1,8 @@
 <?php
 
-namespace Drupal\core_metrics;
+namespace Drupal\core_metrics\Fetcher;
 
+use Drupal\core_metrics\Request\RequestInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 
@@ -155,7 +156,7 @@ abstract class FetcherBase {
    *   The file path.
    */
   protected static function getCacheFilePath(string $fileName): string {
-    return __DIR__ . '/../cache/' . $fileName;
+    return __DIR__ . '/../../cache/' . $fileName;
   }
 
   /**
@@ -168,7 +169,7 @@ abstract class FetcherBase {
    *   The file path to the partial cache..
    */
   protected static function getPartialFilePath(string $fileName): string {
-    return __DIR__ . '/../cache/partial/' . $fileName;
+    return __DIR__ . '/../../cache/partial/' . $fileName;
   }
 
   /**

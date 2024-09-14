@@ -3,8 +3,8 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 use GuzzleHttp\Client;
-use Drupal\core_metrics\IssueListFetcher;
-use Drupal\core_metrics\IssueListRequest;
+use Drupal\core_metrics\Fetcher\IssueListFetcher;
+use Drupal\core_metrics\Request\IssueListRequest;
 use Drupal\core_metrics\MagicIntMetadata;
 
 $magic = new MagicIntMetadata();

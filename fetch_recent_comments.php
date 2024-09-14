@@ -4,10 +4,10 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use GuzzleHttp\Client;
 use Drupal\core_metrics\MagicIntMetadata;
-use Drupal\core_metrics\SingleIssueFetcher;
-use Drupal\core_metrics\SingleIssueRequest;
-use Drupal\core_metrics\UserRecentCommentFetcher;
-use Drupal\core_metrics\UserRecentCommentRequest;
+use Drupal\core_metrics\Fetcher\SingleIssueFetcher;
+use Drupal\core_metrics\Fetcher\UserRecentCommentFetcher;
+use Drupal\core_metrics\Request\SingleIssueRequest;
+use Drupal\core_metrics\Request\UserRecentCommentRequest;
 
 // Fetch recent data for the given d.o username.
 if (empty($argv[1])) {

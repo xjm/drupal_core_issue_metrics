@@ -1,6 +1,8 @@
 <?php
 
-namespace Drupal\core_metrics;
+namespace Drupal\core_metrics\Request;
+
+use Drupal\core_metrics\MagicIntMetadata;
 
 /**
  * Builds a REST API query for Drupal.org comments.

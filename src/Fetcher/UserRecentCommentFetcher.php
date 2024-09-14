@@ -1,7 +1,8 @@
 <?php
 
-namespace Drupal\core_metrics;
+namespace Drupal\core_metrics\Fetcher;
 
+use Drupal\core_metrics\Request\RequestInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 

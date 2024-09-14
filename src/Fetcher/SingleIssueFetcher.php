@@ -1,11 +1,11 @@
 <?php
 
-namespace Drupal\core_metrics;
+namespace Drupal\core_metrics\Fetcher;
 
 /**
  * Fetches results for a given Drupal.org issue request.
  */
-class IssueListFetcher extends FetcherBase {
+class SingleIssueFetcher extends FetcherBase {
 
   /**
    * {@inheritdoc}
