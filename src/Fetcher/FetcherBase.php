@@ -215,7 +215,7 @@ abstract class FetcherBase {
           $data = $this->insertPager($data, $i);
           $this->writeToCache($main_url, $data, TRUE);
         }
-        die("Failed to fetch data on page $i.\n");
+        die("Failed to fetch data on page $i.\n$url\n");
       }
 
       // Follow the pager to the next page of the results.

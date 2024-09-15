@@ -11,12 +11,12 @@ use GuzzleHttp\Exception\BadResponseException;
  */
 class UserRecentCommentFetcher extends FetcherBase {
 
-  public function __construct(protected RequestInterface $requestGroup, protected Client $client, protected int $oldestCommentData = 0) {
+  public function __construct(protected RequestInterface $requestGroup, protected Client $client, protected int $oldestDataTimestamp = 0) {
 
-    if (empty($this->oldestCommentData)) {
+    if (empty($this->oldestDataTimestamp)) {
       // Fetch at least three months of data by default so we don't miss items
       // if we run reports for specific timeframes.
-      $this->oldestCommentData = strtotime('3 months ago');
+      $this->oldestDataTimestamp = strtotime('3 months ago');
     }
   }
 
@@ -28,9 +28,9 @@ class UserRecentCommentFetcher extends FetcherBase {
     // Get the last comment on the page.
     $lastComment = $page->list[sizeof($page->list) - 1];
 
-    // The fetch is complete if the last comment is older than 3 months, or
-    // incomplete otherwise.
-    return $this->oldestCommentData >= $lastComment->created;
+    // The fetch is complete if the last comment is older than the timestamp,
+    // or incomplete otherwise.
+    return $this->oldestDataTimestamp >= $lastComment->created;
   }
 
 }

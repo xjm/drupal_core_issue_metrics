@@ -25,6 +25,14 @@ foreach ($types as $type) {
   $data = $fetcher->getData();
 
   foreach ($branches as $branch) {
+    print "\nPreparing to write $type data for $branch.\n";
+
+    foreach ($data[$branch] as $index => $datum) {
+      if ($index === 'PAGER') {
+        unset($data[$branch][$index]);
+      }
+    }
+
     $updater->writeData($data[$branch]);
   }
 

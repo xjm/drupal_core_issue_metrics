@@ -7,9 +7,7 @@ use Drupal\core_metrics\Fetcher\IssueListFetcher;
 use Drupal\core_metrics\Request\IssueListRequest;
 use Drupal\core_metrics\MagicIntMetadata;
 
-$magic = new MagicIntMetadata();
-
-$branches = $magic::$activeBranches;
+$branches = MagicIntMetadata::$activeBranches;
 $types = ['bug', 'task', 'feature', 'plan'];
 
 foreach ($types as $type) {

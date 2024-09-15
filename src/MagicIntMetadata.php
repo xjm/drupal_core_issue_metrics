@@ -154,6 +154,9 @@ class MagicIntMetadata {
     // The current (stable) minor release branch.
    'stable' => '11.0.x',
 
+   // The current (stable) maintenance minor release branch.
+   'maintenance' => '10.3.x',
+
    // The upcoming (alpha, beta, or RC) minor release branch in preparation.
    // 'prep' => '11.1.x',
 
@@ -161,7 +164,7 @@ class MagicIntMetadata {
    'dev' => '11.1.x',
 
    // The next maintenance minor release branch.
-   'maintenance' => '10.4.x',
+   'maintenance_dev' => '10.4.x',
 
    // The next major release branch.
    'major' => '12.0.x',

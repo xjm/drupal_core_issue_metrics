@@ -4,8 +4,10 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use GuzzleHttp\Client;
 use Drupal\core_metrics\MagicIntMetadata;
+use Drupal\core_metrics\Fetcher\FixedIssueListFetcher;
 use Drupal\core_metrics\Fetcher\SingleIssueFetcher;
 use Drupal\core_metrics\Fetcher\UserRecentCommentFetcher;
+use Drupal\core_metrics\Request\FixedIssueListRequest;
 use Drupal\core_metrics\Request\SingleIssueRequest;
 use Drupal\core_metrics\Request\UserRecentCommentRequest;
 
@@ -15,7 +17,7 @@ if (empty($argv[1])) {
 }
 $username = $argv[1];
 
-// Use the date provided, or default to the last week.
+// Use the starrt date provided, or default to the last week.
 if (!empty($argv[2])) {
   print "Using start date of {$argv[2]}.\n";
   $startDateToUse = strtotime($argv[2]);
@@ -24,6 +26,7 @@ else {
   $startDateToUse = strtotime('last Monday');
 }
 
+// Use the end date provided, or default to a single week.
 if (!empty($argv[3])) {
   print "Using end date of {$argv[3]}.\n";
   $timeframeEndDate = date('F d, Y', strtotime($argv[3]));
@@ -43,7 +46,6 @@ else {
     $timeframeStartDate = date('F d, Y', strtotime('last Monday', strtotime('1 week ago')));
   }
 }
-
 
 // Get the data from d.o.
 $uid = MagicIntMetadata::$uids[$username];
@@ -74,14 +76,14 @@ foreach (array_pop($data) as $comment) {
   }
 }
 
+// If the issue database is available and up to date, use that to get data on
+// all fixed issues during the timeframe.
+
 // Fetch the issue status information from Drupal.org.
 $issueFetcher = new SingleIssueFetcher(new SingleIssueRequest(array_values($nodeIds)), new Client());
 $issueFetcher->fetch();
-
 $issueFetcher->fetchAllFromCache();
 $issueData = $issueFetcher->getData();
-
-// Fetch all fixed credited issues.
 
 $fixed = [];
 $open = [];

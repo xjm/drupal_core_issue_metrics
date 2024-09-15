@@ -28,11 +28,12 @@ class IssueListRequest implements RequestInterface {
    * must construct multiple query URLs in order to filter the data.
    */
   public function __construct(protected array $branches, public string $type) {
-    static::$metadata = new MagicIntMetadata();
 
-    $baseUrl = $this->getBaseUrl()
-      . '&field_issue_category='
-      . static::$metadata::$type[$type];
+    $baseUrl = $this->getBaseUrl();
+
+    if (!empty($type)) {
+      $baseUrl .= '&field_issue_category=' . MagicIntMetadata::$type[$type];
+    }
 
     foreach ($branches as $branch) {
       $this->urls[$branch] = $baseUrl . '&field_issue_version='. $branch . '-dev';
@@ -59,7 +60,6 @@ class IssueListRequest implements RequestInterface {
   public function getType(): string {
     return $this->type;
   }
-
 
   /**
    * Gets the array of branches.
