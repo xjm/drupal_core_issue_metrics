@@ -24,9 +24,23 @@ class IssueDatabaseUpdater extends DatabaseUpdaterBase {
    *   The decoded JSON data.
    */
   public function writeData($data): void {
+
+    // Some issue request results might be empty. Skip those.
+    if (empty($data)) {
+      print "Empty data set. Continuing...\n";
+      return;
+    }
+
     print "Writing data for up to " . sizeof($data) . " issues...\n";
     $pdo = new PDO('sqlite:' . __DIR__ . '/' . static::getDbPath());
-    foreach ($data as $datum) {
+    foreach ($data as $index => $datum) {
+
+      // Skip any pager data that got written somehow, or any empty datum.
+      if ($index === 'PAGER' || empty($datum)) {
+        unset($data[$index]);
+        continue;
+      }
+
       $queries[] = 'INSERT OR IGNORE INTO issue_data '
         . '(nid, created, changed, status, priority, category, version, title, component) '
         . 'VALUES('
