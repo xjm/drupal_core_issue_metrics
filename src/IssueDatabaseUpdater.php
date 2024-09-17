@@ -42,12 +42,13 @@ class IssueDatabaseUpdater extends DatabaseUpdaterBase {
       }
 
       $queries[] = 'INSERT OR IGNORE INTO issue_data '
-        . '(nid, created, changed, status, priority, category, version, title, component) '
+        . '(nid, created, changed, status, status_changed, priority, category, version, title, component) '
         . 'VALUES('
         . (int) $datum->nid . ', '
         . (int) $datum->created . ', '
         . (int) $datum->changed . ', '
         . (int) $datum->field_issue_status . ', '
+        . (int) $datum->field_issue_last_status_change. ', '
         . (int) $datum->field_issue_priority . ', '
         . (int) $datum->field_issue_category . ', '
         . $pdo->quote($datum->field_issue_version) . ', '
@@ -77,6 +78,7 @@ class IssueDatabaseUpdater extends DatabaseUpdaterBase {
       . 'created INTEGER, '
       . 'changed INTEGER, '
       . 'status INTEGER, '
+      . 'status_changed INTEGER, '
       . 'priority INTEGER, '
       . 'category INTEGER, '
       . 'version TEXT, '
