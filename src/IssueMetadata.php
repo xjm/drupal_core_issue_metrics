@@ -8,21 +8,14 @@ namespace Drupal\core_metrics;
 class IssueMetadata extends ImmutableIssueMetadata {
 
   /**
-   * The static issue metadata.
-   */
-  protected static MagicIntMetadata $metadata;
-
-  /**
    * Constructs a new issue metadata value object.
    */
   public function __construct() {
-    static::$metadata = new MagicIntMetadata();
-
     // By default, select open issues in "relevant" statuses.
-    $this->statuses = static::$metadata::$open;
+    $this->statuses = MagicIntMetadata::$open;
 
     // By default, select the actively supported branches.
-    $this->setVersions(array_unique(static::$metadata::$activeBranches));
+    $this->setVersions(array_unique(MagicIntMetadata::$activeBranches));
   }
 
   /**
@@ -61,7 +54,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
     if (empty($categories)) {
       return;
     }
-    $data = static::validateData($categories, static::$metadata::$type);
+    $data = static::validateData($categories, MagicIntMetadata::$type);
     $this->categories = $data;
   }
 
@@ -92,7 +85,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
     if (empty($priorities)) {
       return;
     }
-    $data = static::validateData($priorities, static::$metadata::$priority);
+    $data = static::validateData($priorities, MagicIntMetadata::$priority);
     $this->priorities = $data;
   }
 
@@ -108,7 +101,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
     if (empty($statuses)) {
       return;
     }
-    $data = static::validateData($statuses, static::$metadata::$status);
+    $data = static::validateData($statuses, MagicIntMetadata::$status);
     $this->statuses = $data;
   }
 
@@ -127,7 +120,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
     if (empty($terms)) {
       return;
     }
-    $data = static::validateData($terms, static::$metadata::$tids);
+    $data = static::validateData($terms, MagicIntMetadata::$tids);
     $this->tids = $data;
     $this->excludeTerms = $exclude;
   }
