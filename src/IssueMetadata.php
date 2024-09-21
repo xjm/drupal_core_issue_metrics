@@ -95,7 +95,7 @@ class IssueMetadata extends ImmutableIssueMetadata {
    * @param string[]|int[] $statuses
    *   If the values of terms are integers, they are assumed to be category
    *   IDs. If they are strings, they are assumed to be shorthand labels as
-   *   defined in the magic metadata (like 'critical' or 'major').
+   *   defined in the magic metadata (like 'fixed' or 'postponed').
    */
   public function setStatuses(array $statuses): void {
     if (empty($statuses)) {
