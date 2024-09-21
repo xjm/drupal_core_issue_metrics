@@ -7,6 +7,7 @@ use Drupal\core_metrics\MagicIntMetadata;
 use Drupal\core_metrics\Fetcher\FixedIssueListFetcher;
 use Drupal\core_metrics\Fetcher\SingleIssueFetcher;
 use Drupal\core_metrics\Fetcher\UserRecentCommentFetcher;
+use Drupal\core_metrics\StringQueryRunner;
 use Drupal\core_metrics\Request\FixedIssueListRequest;
 use Drupal\core_metrics\Request\SingleIssueRequest;
 use Drupal\core_metrics\Request\UserRecentCommentRequest;
@@ -78,6 +79,20 @@ foreach (array_pop($data) as $comment) {
 
 // If the issue database is available and up to date, use that to get data on
 // all fixed issues during the timeframe.
+$timestampQueryRunner = new StringQueryRunner('SELECT MAX(changed) FROM issue_data;');
+$result = $timestampQueryRunner->getResults();
+if ($result[0][0] < $timeframeEndDateTimestamp) {
+  print "The local issue database is not up to date.\n"
+    . "To list issues that were fixed during the timeframe but commented on "
+    . "previously, run:\n
+    . "php fetch_active_data.php\n"
+    . "php populate_database.php.\n"
+    . "Note: This data is optional, and updating it can take hours.\n\n";
+}
+else {
+  // Select fixed issues for a given timeframe.
+  $fixedQueryRunner;
+}
 
 // Fetch the issue status information from Drupal.org.
 $issueFetcher = new SingleIssueFetcher(new SingleIssueRequest(array_values($nodeIds)), new Client());

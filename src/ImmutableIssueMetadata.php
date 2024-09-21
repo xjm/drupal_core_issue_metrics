@@ -45,6 +45,34 @@ class ImmutableIssueMetadata {
   protected array $components = [];
 
   /**
+   * The timestamp of the oldest issue updates to select.
+   *
+   * @var int
+   */
+  protected int $changedStartTimestamp = 0;
+
+  /**
+   * The timestamp of the newest issue updates to select.
+   *
+   * @var int|null
+   */
+  protected ?int $changedEndTimestamp;
+
+  /**
+   * The timestamp of the oldest issue status change to select.
+   *
+   * @var int
+   */
+  protected int $statusChangeStartTimestamp = 0;
+
+  /**
+   * The timestamp of the newest issue status change to select.
+   *
+   * @var int|null
+   */
+  protected ?int $statusChangeEndTimestamp;
+
+  /**
    * Taxonomy term IDs to use in the filter.
    *
    * @var int[]
@@ -167,6 +195,48 @@ class ImmutableIssueMetadata {
    */
   public function getComponents(): array {
     return $this->components;
+  }
+
+  /**
+   * Gets the start date for the last issue changes.
+   *
+   * @return int
+   *   The oldest updated dates for issues to select.
+   */
+  public function getChangedStartTimestamp(): int {
+    return $this->changedStartTimestamp;
+  }
+
+  /**
+   * Gets the end date for the last issue changes.
+   *
+   * @return int|null
+   *   The newest updated dates for issues to select. If null, any issues after
+   *   the start date will be selected.
+   */
+  public function getChangedEndTimestamp(): ?int {
+    return $this->changedEndTimestamp;
+  }
+
+  /**
+   * Gets the start date for the oldest issue status change.
+   *
+   * @return int
+   *   The oldest updated dates for issues to select.
+   */
+  public function getStatusChangeTimestamp(): int {
+    return $this->statusChangeStartTimestamp;
+  }
+
+  /**
+   * Gets the end date for the newest issue status change.
+   *
+   * @return int|null
+   *   The newest updated dates for issues to select. If null, any issues after
+   *   the start date will be selected.
+   */
+  public function getStatusChangeEndTimestamp(): ?int {
+    return $this->statusChangeEndTimestamp;
   }
 
   /**

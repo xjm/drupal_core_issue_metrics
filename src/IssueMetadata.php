@@ -106,6 +106,34 @@ class IssueMetadata extends ImmutableIssueMetadata {
   }
 
   /**
+   * Sets the date range for the last issue update.
+   *
+   * @param int $changedStartTimestamp
+   *   Timestamp of the oldest issue updates to select.
+   * @param int|null $changedEndTimestamp
+   *   Timestamp of the newest issues to select. If null, any issues with an
+   *   update after $changedStartTimestamp will be included.
+   */
+  public function setChangedDateRange(int $changedStartTimestamp, ?int $changedEndTimestamp = NULL) {
+    $this->changedStartTimestamp = $changedStartTimestamp;
+    $this->changedEndTimestamp = $changedEndTimestamp;
+  }
+
+  /**
+   * Sets the date range for the last issue status change.
+   *
+   * @param int $statusChangeStartTimestamp
+   *   Timestamp of the oldest issue updates to select.
+   * @param int|null $statusChangeEndTimestamp
+   *   Timestamp of the newest issues to select. If null, any issues with an
+   *   update after $statusChangeStartTimestamp will be included.
+   */
+  public function setStatusChangeDateRange(int $statusChangeStartTimestamp, ?int $statusChangeEndTimestamp = NULL) {
+    $this->statusChangeStartTimestamp = $statusChangeStartTimestamp;
+    $this->statusChangeEndTimestamp = $statusChangeEndTimestamp;
+  }
+
+  /**
    * Sets the taxonomy term query data.
    *
    * @param string[]|int[] $terms

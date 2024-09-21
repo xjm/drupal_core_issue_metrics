@@ -38,26 +38,40 @@ class IssueQuery {
   }
 
   /**
-   * Finds issues that may have been committed to a given branch.
+   * Configures the query to find fixed issues for a certain timeframe.
    *
-   * This issue searches branches before and after the given issue, since
-   * issues may be backported and the selector is not always set correctly.
-   * Data should be checked against the git log to validate which branches
-   * actually received the commits.
+   * Note: This will only select issues in the 'Fixed' status, which lasts for
+   * two weeks if there are no issue updates. To get older fixed issues, use
+   * IssueQuery::findClosedFixed().
    *
-   * @param string $branch
-   *   The main branch for which to fetch data.
-   * @param array $types
-   *   (optional) The issue types (categories) to select. Ignored if empty.
-   * @param array $priorities
-   *   (optional) The issue priorities to select. Ignored if empty.
+   * @param int $statusChangeStartTimestamp
+   *   Select issues with their last status change after the given timestamp.
+   *   If empty, no limit is placed on the age of the issues.
+   * @param ?int $statusChangeEndTimestamp = NULL
+   *   Select issues with their last status change after the given timestamp.
+   *   If empty, the latest issues in the database will be included.
    */
-  public function findIssuesFixedIn($branch, array $types = [], array $priorities = []): void {
-    $branches = static::getFixRelevantBranches($branch);
-    $this->metadata->setBranches($branches);
-    $this->metadata->setStatuses(static::$magic::$fixed);
-    $this->metadata->setTypes($types);
-    $this->metadata->setPriorities($priorities);
+  public function findFixed(int $statusChangeStartTimestamp, ?int $statusChangeEndTimestamp = NULL): void {
+    $this->metadata->setStatusChangeDateRange($statusChangeStartTimestamp, $statusChangeEndtimestamp);
+    $this->metadata->SetStatuses([2]);
+  }
+  /**
+   * Configures the query to find Closed (fixed) issues for a certain timeframe.
+   *
+   * Note: This will only select issues in the 'Closed (fixed)' status, which
+   * is set automatically if there are no issue updates for two weeks. To get
+   * recently fixed issues, use IssueQuery::findFixed().
+   *
+   * @param int $statusChangeStartTimestamp
+   *   Select issues with their last status change after the given timestamp.
+   *   If empty, no limit is placed on the age of the issues.
+   * @param ?int $statusChangeEndTimestamp = NULL
+   *   Select issues with their last status change after the given timestamp.
+   *   If empty, the latest issues in the database will be included.
+   */
+  public function findClosedFixed(int $statusChangeStartTimestamp, ?int $statusChangeEndTimestamp = NULL): void {
+    $this->metadata->setStatusChangeDateRange($statusChangeStartTimestamp, $statusChangeEndtimestamp);
+    $this->metadata->SetStatuses([7]);
   }
 
   /**
