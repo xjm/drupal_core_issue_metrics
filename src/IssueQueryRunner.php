@@ -7,22 +7,7 @@ use \PDO;
 /**
  * Queries issue data.
  */
-class QueryRunner {
-
-  /**
-   * The relative path to the SQLite database file.
-   */
-  protected static string $dbPath = '../data/issue_data.sqlite';
-
-  /**
-   * The assembled query string.
-   */
-  protected string $queryString;
-
-  /**
-   * The query parameters
-   */
-  protected array $queryParameters;
+class IssueQueryRunner extends QueryRunnerBase {
 
   /**
    * Constructs a new issue query.
@@ -35,28 +20,12 @@ class QueryRunner {
    */
   public function __construct(protected IssueQuery $query, PDO $db = NULL) {
 
-    // Initialize the database connection if none was passed.
-    if ($db === NULL) {
-      $db = new PDO('sqlite:' . __DIR__ . '/' . static::$dbPath);
-    }
-    $this->db = $db;
+    parent::__construct();
 
     // Get the query metadata.
     $this->metadata = $query->getMetadata();
 
     $this->assembleQueryString();
-  }
-
-  /**
-   * Executes the query and returns all results.
-   *
-   * @return array
-   *   The results from the database.
-   */
-  public function getResults(): array {
-    $statement = $this->db->prepare($this->queryString);
-    $statement->execute($this->queryParameters);
-    return $statement->fetchAll();
   }
 
   /**

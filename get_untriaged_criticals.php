@@ -3,11 +3,11 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 use Drupal\core_metrics\IssueQuery;
-use Drupal\core_metrics\QueryRunner;
+use Drupal\core_metrics\IssueQueryRunner;
 
 $query = new IssueQuery();
 $query->findUntriagedCriticalBugs();
-$runner = new QueryRunner($query);
+$runner = new IssueQueryRunner($query);
 $results = $runner->getResults();
 
 $now = new DateTime();
