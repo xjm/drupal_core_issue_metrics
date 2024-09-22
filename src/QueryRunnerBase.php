@@ -31,6 +31,11 @@ abstract class QueryRunnerBase {
   protected string|IssueQuery $query;
 
   /**
+   * The query metadata.
+   */
+  protected ImmutableIssueMetadata $metadata;
+
+  /**
    * Constructs a new issue query.
    *
    * @param string|IssueQuery $query
@@ -42,16 +47,8 @@ abstract class QueryRunnerBase {
   public function __construct(string|IssueQuery $query, protected ?PDO $db = NULL) {
 
     // Initialize the database connection if none was passed.
-    if ($db === NULL) {
-      $db = new PDO('sqlite:' . __DIR__ . '/' . static::$dbPath);
-    }
-    $this->db = $db;
+    $this->initializeDatabase();
   }
-
-  /**
-   * Assembles the query based on the metadata.
-   */
-  abstract protected function assembleQueryString(): void;
 
   /**
    * Executes the query and returns all results.
@@ -65,4 +62,12 @@ abstract class QueryRunnerBase {
     return $statement->fetchAll();
   }
 
+  /**
+   * Initializes the database.
+   */
+  public function initializeDatabase(): void {
+    if ($this->db === NULL) {
+      $this->db = new PDO('sqlite:' . __DIR__ . '/' . static::$dbPath);
+    }
+  }
 }

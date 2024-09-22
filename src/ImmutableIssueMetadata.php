@@ -45,32 +45,26 @@ class ImmutableIssueMetadata {
   protected array $components = [];
 
   /**
-   * The timestamp of the oldest issue updates to select.
+   * The array of issue date range timestamps.
    *
-   * @var int
-   */
-  protected int $changedStartTimestamp = 0;
-
-  /**
-   * The timestamp of the newest issue updates to select.
+   * The array will have associated keys with the following structure:
+   * - changedStart
+   *     The timestamp for the oldest updated issues to select. If 0, no lower
+   *     limit is placed on the changed date.
+   * - changedEnd
+   *     The timestamp of the most recently updated issues to select. If 0, no
+   *     upper limit is placed on the changed date.
+   * - statusChangeStart
+   *     The timestamp for the oldest status change to select. If 0, no lower
+   *     limit is placed on the status changed date.
+   * - statusChangeEnd
+   *     The timestamp for the most recent status
+   *     change to select. If 0, no upper limit is placed on the status changed
+   *     date.
    *
-   * @var int|null
+   * @var int[]
    */
-  protected ?int $changedEndTimestamp;
-
-  /**
-   * The timestamp of the oldest issue status change to select.
-   *
-   * @var int
-   */
-  protected int $statusChangeStartTimestamp = 0;
-
-  /**
-   * The timestamp of the newest issue status change to select.
-   *
-   * @var int|null
-   */
-  protected ?int $statusChangeEndTimestamp;
+  protected array $timestamps = [];
 
   /**
    * Taxonomy term IDs to use in the filter.
@@ -198,45 +192,56 @@ class ImmutableIssueMetadata {
   }
 
   /**
-   * Gets the start date for the last issue changes.
+   * Gets the array of potential timestamps start and end limits for the query.
    *
-   * @return int
+   * @return int[]
    *   The oldest updated dates for issues to select.
    */
-  public function getChangedStartTimestamp(): int {
-    return $this->changedStartTimestamp;
+  public function getTimestamps(): array {
+      return $this->timestamps;
+  }
+
+/**
+   * Gets the array of issue timestamp conditions.
+   *
+   * @return int[]
+   *   The array of timestamps.
+   */
+  public function getChangedStartTimestamp(): array {
+    return $this->timestamps['changedStart'];
   }
 
   /**
    * Gets the end date for the last issue changes.
    *
-   * @return int|null
-   *   The newest updated dates for issues to select. If null, any issues after
+   * @return int
+   *   The newest updated dates for issues to select. If 0, any issues after
    *   the start date will be selected.
    */
-  public function getChangedEndTimestamp(): ?int {
-    return $this->changedEndTimestamp;
+  public function getChangedEndTimestamp(): int {
+    return $this->timestamps['changedEnd'];
   }
 
   /**
    * Gets the start date for the oldest issue status change.
    *
    * @return int
-   *   The oldest updated dates for issues to select.
+   *   The oldest updated dates for issues to select. If 0, no lower limit is
+   *   placed on the issue last updated date.
    */
   public function getStatusChangeTimestamp(): int {
-    return $this->statusChangeStartTimestamp;
+    return $this->timestamps['statusChangeStart'];
   }
 
   /**
    * Gets the end date for the newest issue status change.
    *
-   * @return int|null
-   *   The newest updated dates for issues to select. If null, any issues after
+   * @return int
+   *   The newest updated dates for issues to select. If 0, any issues after
    *   the start date will be selected.
    */
-  public function getStatusChangeEndTimestamp(): ?int {
-    return $this->statusChangeEndTimestamp;
+  public function getStatusChangeEndTimestamp(): int {
+    return $this->timestamps['statusChangeEnd'];
   }
 
   /**

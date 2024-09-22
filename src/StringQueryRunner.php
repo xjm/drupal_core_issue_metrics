@@ -5,7 +5,10 @@ namespace Drupal\core_metrics;
 use \PDO;
 
 /**
- * Queries issue data.
+ * Queries issue data with a query string.
+ *
+ * WARNING: This object does NO sanitization. Callers must sanitize the string
+ * if necessary.
  */
 class StringQueryRunner extends QueryRunnerBase {
 
@@ -19,7 +22,8 @@ class StringQueryRunner extends QueryRunnerBase {
    *  database at the default path is opened.
    */
   public function __construct(string|IssueQuery $query, protected ?PDO $db = NULL) {
-    parent::_construct();
+    // Initialize the database connection if none was passed.
+    $this->initializeDatabase();
 
     $this->query = $query;
     if (is_string($query)) {

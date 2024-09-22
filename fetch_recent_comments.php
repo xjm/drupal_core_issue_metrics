@@ -7,10 +7,12 @@ use Drupal\core_metrics\MagicIntMetadata;
 use Drupal\core_metrics\Fetcher\FixedIssueListFetcher;
 use Drupal\core_metrics\Fetcher\SingleIssueFetcher;
 use Drupal\core_metrics\Fetcher\UserRecentCommentFetcher;
-use Drupal\core_metrics\StringQueryRunner;
+use Drupal\core_metrics\IssueQuery;
+use Drupal\core_metrics\IssueQueryRunner;
 use Drupal\core_metrics\Request\FixedIssueListRequest;
 use Drupal\core_metrics\Request\SingleIssueRequest;
 use Drupal\core_metrics\Request\UserRecentCommentRequest;
+use Drupal\core_metrics\StringQueryRunner;
 
 // Fetch recent data for the given d.o username.
 if (empty($argv[1])) {
@@ -63,6 +65,7 @@ $timeframeEndDateTimestamp = strtotime($timeframeEndDate);
 // Collect organization and issue data from the comments.
 $dataByOrg = [];
 $nodeIds = [];
+$commentedNodeIds = [];
 
 // array_pop() because recent comment requests are a single type.
 foreach (array_pop($data) as $comment) {
@@ -71,7 +74,7 @@ foreach (array_pop($data) as $comment) {
         if ($comment->created >= $timeframeStartDateTimestamp && ($comment->created < $timeframeEndDateTimestamp)) {
         $nid = $comment->node->id;
         $dataByOrg[$org->id][$comment->node->id] = $nid;
-        $nodeIds[$nid] = $nid;
+        $nodeIds[$nid] = $commentedNodeIds[$nid] = $nid;
       }
     }
   }
@@ -81,18 +84,41 @@ foreach (array_pop($data) as $comment) {
 // all fixed issues during the timeframe.
 $timestampQueryRunner = new StringQueryRunner('SELECT MAX(changed) FROM issue_data;');
 $result = $timestampQueryRunner->getResults();
+$noComment = [];
 if ($result[0][0] < $timeframeEndDateTimestamp) {
   print "The local issue database is not up to date.\n"
     . "To list issues that were fixed during the timeframe but commented on "
-    . "previously, run:\n
+    . "previously, run:\n"
     . "php fetch_active_data.php\n"
     . "php populate_database.php.\n"
     . "Note: This data is optional, and updating it can take hours.\n\n";
 }
 else {
-  // Select fixed issues for a given timeframe.
-  $fixedQueryRunner;
+  print "Fetching data on issues fixed in previous weeks.\n";
+
+  // Select fixed issues for the given timeframe beyond those with comments.
+  $fixedIsssues = [];
+
+  // Get recently fixed issues.
+  $fixedQuery = new IssueQuery();
+  $fixedQuery->findFixed($timeframeStartDateTimestamp, $timeframeEndDateTimestamp);
+  $fixedQueryRunner = new IssueQueryRunner($fixedQuery);
+  $fixedIssues['fixed'] = $fixedQueryRunner->getResults();
+
+  $closedFixedQuery = new IssueQuery();
+  $closedFixedQuery->findClosedFixed($timeframeStartDateTimestamp, $timeframeEndDateTimestamp);
+  $closedFixedQueryRunner = new IssueQueryRunner($closedFixedQuery);
+  $fixedIssues['closed'] = $fixedQueryRunner->getResults();
+
+  foreach ($fixedIssues as $fixedIssueSet) {
+    foreach ($fixedIssueSet as $fixedIssue) {
+      if (empty($nodeIds[$fixedIssue['nid']])) {
+        $nodeIds[$fixedIssue['nid']] = $fixedIssue['nid'];
+      }
+    }
+  }
 }
+
 
 // Fetch the issue status information from Drupal.org.
 $issueFetcher = new SingleIssueFetcher(new SingleIssueRequest(array_values($nodeIds)), new Client());
@@ -102,28 +128,34 @@ $issueData = $issueFetcher->getData();
 
 $fixed = [];
 $open = [];
+$previously = [];
 foreach ($issueData as $nodeId => $issue) {
-  // array_pop because each single issue is an array of a single element.
-  $issue = array_pop($issue);
-  if (in_array($issue->field_issue_status, MagicIntMetadata::$fixed)) {
-    $fixed[$nodeId] = $nodeId;
+  // If the issue was commented on during the specified time period, add it to
+  // the appropriate lists.
+  if (!empty($commentedNodeIds[$nodeId])) {
+    // array_pop because each single issue is an array of a single element.
+    $issue = array_pop($issue);
+    if (in_array($issue->field_issue_status, MagicIntMetadata::$fixed)) {
+      $fixed[$nodeId] = $nodeId;
+    }
+    elseif (in_array($issue->field_issue_status, MagicIntMetadata::$open)) {
+      $open[$nodeId] = $nodeId;
+    }
   }
-  elseif (in_array($issue->field_issue_status, MagicIntMetadata::$open)) {
-    $open[$nodeId] = $nodeId;
+  else {
+    $noComment[$nodeId] = $nodeId;
   }
 }
 
-print "\n\n";
-
 $orgLabels = array_flip(MagicIntMetadata::$orgs);
 foreach ($dataByOrg as $orgId => $issues) {
-  print "# Issues attributed to " . $orgLabels[$orgId] . " by $username for $timeframeStartDate through $timeframeEndDate\n\n";
-  foreach (['Fixed' => $fixed, 'Open' => $open] as $label => $list) {
+  print "# Issues attributed to {$orgLabels[$orgId]} by $username for $timeframeStartDate through $timeframeEndDate\n\n";
+  foreach (['Fixed' => $fixed, 'Open' => $open, 'Fixed from previous weeks' => $noComment] as $label => $list) {
     print "## $label issues\n";
     foreach ($issues as $nodeId) {
       if (in_array($nodeId, $list)) {
         $isCredited = FALSE;
-        if ($label === 'Fixed') {
+        if ($label === 'Fixed' || $label === 'Fixed from previous weeks') {
           foreach ($issueData[$nodeId][0]->field_issue_credit as $creditEntry) {
             if ($creditEntry->data->username == $username) {
               $isCredited = TRUE;

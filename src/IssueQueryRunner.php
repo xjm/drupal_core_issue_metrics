@@ -18,9 +18,10 @@ class IssueQueryRunner extends QueryRunnerBase {
    *  (optional) The database connection. If NULL, a new connection to the SQLite
    *  database at the default path is opened.
    */
-  public function __construct(protected IssueQuery $query, PDO $db = NULL) {
+  public function __construct(protected IssueQuery|string $query, protected ?PDO $db = NULL) {
 
-    parent::__construct();
+    // Initialize the database connection if none was passed.
+    $this->initializeDatabase();
 
     // Get the query metadata.
     $this->metadata = $query->getMetadata();
@@ -44,6 +45,7 @@ class IssueQueryRunner extends QueryRunnerBase {
 
     $query = " SELECT * FROM issue_data \n";
 
+    // Handle the taxonomy term join if needed.
     if (!empty($terms) && !$this->metadata->excludeTerms()) {
       $query .= " LEFT JOIN nid_tid \n"
         . " ON issue_data.nid = nid_tid.nid AND nid_tid.tid ";
@@ -79,6 +81,29 @@ class IssueQueryRunner extends QueryRunnerBase {
 
     $query .= " WHERE \n" . implode("\n AND ", $conditions) . " \n";
 
+    // Handle issue date restrictions.
+    if (!empty($timeArray = $this->metadata->getTimestamps())) {
+      // Throw an exception if someone tried to used both changed and status
+      // changed dates.
+      if ((!empty($timeArray['changedStart']) && !empty($timestampArray['statusChangeStart'])) || (!empty($timeArray['changedEnd']) && !empty($timeArray['statusChangeEnd']))) {
+        throw new \UnexpectedValueException('You must specify only one start time and one end time.');
+      }
+
+      if (!empty($timeArray['changedStart'])) {
+        $query .= "\n AND issue_data.changed >= {$timeArray['changedStart']} ";
+      }
+      if (!empty($timeArray['statusChangeStart'])) {
+        $query .= "\n AND issue_data.status_changed >= {$timeArray['statusChangeStart']} ";
+      }
+      if (!empty($timeArray['changedEnd'])) {
+        $query .= "\n AND issue_data.changed <= {$timeArray['changedEnd']}";
+      }
+      if (!empty($timeArray['statusChangeEnd'])) {
+        $query .= "\n AND issue_data.status_changed <= {$timeArray['statusChangeEnd']}";
+      }
+    }
+
+    // Add join to exclude taxonomy terms.
     if (!empty($terms) && $this->metadata->excludeTerms()) {
       foreach ($terms as $tid) {
         $query .= " AND issue_data.nid NOT IN ( \n"

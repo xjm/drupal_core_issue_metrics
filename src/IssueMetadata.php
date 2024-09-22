@@ -110,13 +110,13 @@ class IssueMetadata extends ImmutableIssueMetadata {
    *
    * @param int $changedStartTimestamp
    *   Timestamp of the oldest issue updates to select.
-   * @param int|null $changedEndTimestamp
-   *   Timestamp of the newest issues to select. If null, any issues with an
+   * @param int $changedEndTimestamp
+   *   Timestamp of the newest issues to select. If 0, any issues with an
    *   update after $changedStartTimestamp will be included.
    */
-  public function setChangedDateRange(int $changedStartTimestamp, ?int $changedEndTimestamp = NULL) {
-    $this->changedStartTimestamp = $changedStartTimestamp;
-    $this->changedEndTimestamp = $changedEndTimestamp;
+  public function setChangedDateRange(int $changedStartTimestamp, int $changedEndTimestamp = 0) {
+    $this->timestamps['changedStart'] = $changedStartTimestamp;
+    $this->timestamps['changedEnd'] = $changedEndTimestamp;
   }
 
   /**
@@ -125,12 +125,12 @@ class IssueMetadata extends ImmutableIssueMetadata {
    * @param int $statusChangeStartTimestamp
    *   Timestamp of the oldest issue updates to select.
    * @param int|null $statusChangeEndTimestamp
-   *   Timestamp of the newest issues to select. If null, any issues with an
+   *   Timestamp of the newest issues to select. If 0, any issues with an
    *   update after $statusChangeStartTimestamp will be included.
    */
-  public function setStatusChangeDateRange(int $statusChangeStartTimestamp, ?int $statusChangeEndTimestamp = NULL) {
-    $this->statusChangeStartTimestamp = $statusChangeStartTimestamp;
-    $this->statusChangeEndTimestamp = $statusChangeEndTimestamp;
+  public function setStatusChangeDateRange(int $statusChangeStartTimestamp, int $statusChangeEndTimestamp = 0) {
+    $this->timestamps['statusChangeStart'] = $statusChangeStartTimestamp;
+    $this->timestamps['statusChangeEnd'] = $statusChangeEndTimestamp;
   }
 
   /**

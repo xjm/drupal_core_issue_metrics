@@ -47,12 +47,12 @@ class IssueQuery {
    * @param int $statusChangeStartTimestamp
    *   Select issues with their last status change after the given timestamp.
    *   If empty, no limit is placed on the age of the issues.
-   * @param ?int $statusChangeEndTimestamp = NULL
+   * @param int $statusChangeEndTimestamp = 0
    *   Select issues with their last status change after the given timestamp.
    *   If empty, the latest issues in the database will be included.
    */
-  public function findFixed(int $statusChangeStartTimestamp, ?int $statusChangeEndTimestamp = NULL): void {
-    $this->metadata->setStatusChangeDateRange($statusChangeStartTimestamp, $statusChangeEndtimestamp);
+  public function findFixed(int $statusChangeStartTimestamp, int $statusChangeEndTimestamp = 0): void {
+    $this->metadata->setStatusChangeDateRange($statusChangeStartTimestamp, $statusChangeEndTimestamp);
     $this->metadata->SetStatuses([2]);
   }
   /**
@@ -65,12 +65,18 @@ class IssueQuery {
    * @param int $statusChangeStartTimestamp
    *   Select issues with their last status change after the given timestamp.
    *   If empty, no limit is placed on the age of the issues.
-   * @param ?int $statusChangeEndTimestamp = NULL
+   * @param int $statusChangeEndTimestamp = 0
    *   Select issues with their last status change after the given timestamp.
    *   If empty, the latest issues in the database will be included.
    */
-  public function findClosedFixed(int $statusChangeStartTimestamp, ?int $statusChangeEndTimestamp = NULL): void {
-    $this->metadata->setStatusChangeDateRange($statusChangeStartTimestamp, $statusChangeEndtimestamp);
+  public function findClosedFixed(int $statusChangeStartTimestamp, int $statusChangeEndTimestamp = 0): void {
+    // Issues move to the Closed (fixed) status two weeks after there are no
+    // further comments. In most cases, this status transition is exactly two
+    // weeks after the previous status change from RTBC to Fixed. Therefore,
+    // add two weeks to both status change timestamps.
+    $statusChangeStartTimestamp = strtotime(date('+14 days', $statusChangeStartTimestamp));
+    $statusChangeEndTimestamp = strtotime(date('+14 days', $statusChangeEndTimestamp));
+    $this->metadata->setStatusChangeDateRange($statusChangeStartTimestamp, $statusChangeEndTimestamp);
     $this->metadata->SetStatuses([7]);
   }
 
@@ -119,24 +125,25 @@ class IssueQuery {
 
     $branches = [$branch];
 
-    if ($major < 10 || ($major === 10 && $minor < 3) {
+    if ($major < 10 || ($major === 10 && $minor < 3)) {
       // Prior to Drupal 11 development, up to three minor branches received
       // commits at a time: the latest dev branch, the branch being prepared
       // for an upcoming minor release, and the bugfix-only branch.
       // So, count up to two minor branches below and above an old branch.
-    for ($i = 1; $i <= 2; $i++) {
-      if (($minor - $i) >= 0) {
-        $branches[] = $major . '.' . $minor - $i . '.x';
+      for ($i = 1; $i <= 2; $i++) {
+        if (($minor - $i) >= 0) {
+          $branches[] = $major . '.' . $minor - $i . '.x';
+        }
       }
-    }
-    for ($i = 1; $i <= 2; $i++) {
-      if (($minor + $i) <= $max_minor) {
-        $branches[] = $major . '.' . $minor + $i . '.x';
+      for ($i = 1; $i <= 2; $i++) {
+        if (($minor + $i) <= $max_minor) {
+          $branches[] = $major . '.' . $minor + $i . '.x';
+        }
       }
     }
 
     // Drupal 8.7.x and 8.8.x received commits alongside 9.0.x.
-    if (($major === 8) && (($minor === 7) || ($minor === 8))) {
+    if ($major === 8 && ($minor === 7 || $minor === 8)) {
       $branches[] = '9.0.x';
     }
     if ($branch === '9.0.x') {
@@ -155,7 +162,7 @@ class IssueQuery {
     }
 
     // Drupal 9.2.x and above received commits alongside 10.0.x.
-    if (($major === 9) && ($minor >= 2)) {
+    if ($major === 9 && $minor >= 2) {
       $branches[] = '10.0.x';
     }
     if ($branch === '10.0.x') {
@@ -184,14 +191,14 @@ class IssueQuery {
     }
 
     // Add 11.x to every D10 development phase from that point on.
-    if ($major > 10 || ($major === 10 && $minor ==> 2)) {
+    if ($major > 10 || ($major == 10 && $minor >= 2)) {
       $branches[] = '11.x';
     }
 
     // Much of 10.3.x development was done in 11.x only, but 11.0.x and 10.4.x
     // were opened in the spring, and the development of all three branches
     // overlapped weirdly due to the August release scenario.
-    if (in_array($branch, ['10.3.x', '10.4.x', '11.0.x']) {
+    if (in_array($branch, ['10.3.x', '10.4.x', '11.0.x'])) {
       $branches[] = '10.3.x';
       $branches[] = '10.4.x';
       $branches[] = '11.0.x';
@@ -200,7 +207,7 @@ class IssueQuery {
     // Going forward, 11.1.x will be paired with 10.4.x (but 11.1.x does not
     // open until immediately before the alpha deadline). 10.3.x and 11.0.x
     // receive bugfixes before 10.4.x's release.
-    if ($major === 10 && $minor ==> 4) {
+    if ($major == 10 && $minor >= 4) {
       $branches[] = $major . '.' .  $minor - 1 . '.x';
       $branches[] = $major + 1 . '.' .  $minor - 3 . '.x';
       $branches[] = $major + 1 . '.' .  $minor - 4 . '.x';
