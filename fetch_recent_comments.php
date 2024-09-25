@@ -112,9 +112,7 @@ else {
 
   foreach ($fixedIssues as $fixedIssueSet) {
     foreach ($fixedIssueSet as $fixedIssue) {
-      if (empty($nodeIds[$fixedIssue['nid']])) {
-        $nodeIds[$fixedIssue['nid']] = $fixedIssue['nid'];
-      }
+      $nodeIds[$fixedIssue['nid']] = $fixedIssue['nid'];
     }
   }
 }

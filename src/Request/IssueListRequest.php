@@ -44,7 +44,7 @@ class IssueListRequest implements RequestInterface {
    * {@inheritdoc}
    */
   public function getBaseUrl(): string {
-    return 'https://www.drupal.org/api-d7/node.json?type=project_issue&field_project=3060&direction=DESC';
+    return 'https://www.drupal.org/api-d7/node.json?type=project_issue&field_project=3060';
   }
 
   /**
